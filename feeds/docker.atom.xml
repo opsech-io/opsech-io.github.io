@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#&gt; opsech.io - docker</title><link href="https://opsech.io/" rel="alternate"></link><link href="https://opsech.io/feeds/docker.atom.xml" rel="self"></link><id>https://opsech.io/</id><updated>2017-06-06T16:18:24-04:00</updated><entry><title>Docker cleanup aliases for bash</title><link href="https://opsech.io/posts/2017/Jun/06/docker-cleanup-aliases-for-bash.html" rel="alternate"></link><published>2017-06-06T16:18:24-04:00</published><updated>2017-06-06T16:18:24-04:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2017-06-06:/posts/2017/Jun/06/docker-cleanup-aliases-for-bash.html</id><summary type="html">&lt;p&gt;As I progress with learning docker I eventually found myself annoyed with how much it leaves behind at the behest of the user to clean up. (That is, it doesn&amp;#8217;t seem to do a very good job of cleaning up after itself). I wrote these aliases for myself while …&lt;/p&gt;</summary><content type="html">&lt;p&gt;As I progress with learning docker I eventually found myself annoyed with how much it leaves behind at the behest of the user to clean up. (That is, it doesn&amp;#8217;t seem to do a very good job of cleaning up after itself). I wrote these aliases for myself while I learn and explore Docker in order to aid in cleaning my system up during the process of testing and using many containers and&amp;nbsp;images.&lt;/p&gt;
+&lt;p&gt;I personally use this merged with my &lt;a href="https://github.com/xenithorb/dotfiles/blob/master/.aliases"&gt;&lt;code&gt;.aliases&lt;/code&gt;&lt;/a&gt; file which is a part of my &lt;a href="https://github.com/xenithorb/dotfiles"&gt;dotfiles repo&lt;/a&gt;. I use this simple dotfiles &amp;#8220;framework&amp;#8221; to keep a consistent set of configs between systems I want to&amp;nbsp;customize.&lt;/p&gt;
+&lt;script src="https://gist.github.com/xenithorb/c0fdae80878a010759b2a3d1d76cf608.js"&gt;&lt;/script&gt;
+
+&lt;!-- ```bash
+# These should go in ~/.bashrc or an equivalent area that is sourced into your shell environmemnt
+
+# Remove all docker containers running and exited
+alias docker-rma='__drma() { docker ps -aq "$@" | xargs -r docker rm -f; }; __drma'
+# Remove all docker images
+alias docker-rmia='__drmia() { docker images -q "$@" | xargs -r docker rmi -f; }; __drmia'
+# Remove all custom docker networks
+alias docker-rmnet='__drmnet() { docker network ls -q -f type=custom "$@" | xargs -r docker network rm; }; __drmnet'
+# Remove all unused volumes
+alias docker-rmvol='__drmvol() { docker volume ls -q "$@" | xargs -r docker volume rm; }; __drmvol'
+# Remove all docker containers and all docker images
+alias docker-rmall='docker-rma &amp;&amp; docker-rmia'
+# Remove all docker containers, images, custom networks, and volumes
+alias docker-nuke='docker-rmall; docker-rmnet; docker-rmvol'
+# Remove only exited containers, unused images, unused networks, and unused volumes
+alias docker-clean='docker-rma -f status=exited; docker-rmia -f dangling=true; docker-rmnet; docker-rmvol -f dangling=true'
+``` --&gt;</content><category term="docker"></category><category term="bash"></category><category term="linux"></category><category term="containers"></category></entry><entry><title>Docker DNS with FirewallD on Fedora</title><link href="https://opsech.io/posts/2017/May/23/docker-dns-with-firewalld-on-fedora.html" rel="alternate"></link><published>2017-05-23T14:17:17-04:00</published><updated>2017-06-01T19:28:04-04:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2017-05-23:/posts/2017/May/23/docker-dns-with-firewalld-on-fedora.html</id><summary type="html">&lt;p&gt;How to allow docker to use the local system &lt;span class="caps"&gt;DNS&lt;/span&gt; cache (dnsmasq) because otherwise docker defaults to using Google &lt;span class="caps"&gt;DNS&lt;/span&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;By default docker reads in the host&amp;#8217;s &lt;code&gt;/etc/resolv.conf&lt;/code&gt; file and if it only contains &lt;code&gt;nameserver 127.0.0.1&lt;/code&gt;, it is hard-coded to use Google &lt;span class="caps"&gt;DNS&lt;/span&gt;. This is especially pertinent if you&amp;#8217;re using local DNSMasq for caching &lt;a href="https://opsech.io/posts/2016/Feb/14/quick-tip-enable-easy-networkmanager-local-dns-caching.html"&gt;like I instructed in a previous post&lt;/a&gt;. For those of us who have &lt;span class="caps"&gt;DNS&lt;/span&gt; properly configured within our own networks, this is undesirable for obvious reasons and what follows is how to fix&amp;nbsp;that.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;First, the docker daemon needs to be instructed to only use a certain set of &lt;span class="caps"&gt;DNS&lt;/span&gt; servers. This can be done with the &lt;code&gt;daemon.json&lt;/code&gt; configuration file, usually located in &lt;code&gt;/etc/docker/daemon.json&lt;/code&gt; - please create this if it does not&amp;nbsp;exist:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;dns&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;172.17.0.1&amp;quot;&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;By default the docker daemon creates an interface &lt;code&gt;docker0&lt;/code&gt; with a default address of &lt;code&gt;172.17.0.1/16&lt;/code&gt;. With the above config, this instructs docker to rewrite the &lt;code&gt;resolv.conf&lt;/code&gt; file &lt;strong&gt;&lt;em&gt;inside the containers&lt;/em&gt;&lt;/strong&gt; as&amp;nbsp;follows:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;nameserver 172.17.0.1
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Restart the docker engine with &lt;code&gt;sudo systemctl restart docker.service&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The next step is to lead off of the instructions &lt;a href="https://opsech.io/posts/2016/Feb/14/quick-tip-enable-easy-networkmanager-local-dns-caching.html"&gt;here&lt;/a&gt; and configure the dnsmasq process that NetworkManager runs to listen to the local docker interface. The following needs to be placed in a &lt;code&gt;.conf&lt;/code&gt; file in &lt;code&gt;/etc/NetworkManager/dnsmasq.d/&lt;/code&gt;, for example &lt;code&gt;docker-bridge.conf&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;interface=docker0
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This is telling &lt;code&gt;dnsmasq&lt;/code&gt; - specifically the one started from NetworkManager - to listen on the interface &lt;code&gt;docker0&lt;/code&gt;. Please adjust accordingly if you&amp;#8217;re not using dnsmasq in conjunction with NetworkManager (It is not configured this way by default, see &lt;a href="https://opsech.io/posts/2016/Feb/14/quick-tip-enable-easy-networkmanager-local-dns-caching.html"&gt;here&lt;/a&gt;)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Restart NetworkManager with &lt;code&gt;sudo systemctl restart NetworkManager.service&lt;/code&gt;. (Restarting NetworkManager causes &lt;code&gt;dnsmasq&lt;/code&gt; to also be&amp;nbsp;restarted.)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The final step is only necessary if you&amp;#8217;re using FirewallD (or translate yourself for iptables). What we want to do is add a zone for docker, then assign the &lt;code&gt;docker0&lt;/code&gt; interface to that zone, then finally add a valid source to that zone (&lt;strong&gt;because firewalld will not activate a zone without a valid source or interface it recognizes&lt;/strong&gt;. In this case &lt;code&gt;docker0&lt;/code&gt; is managed by NetworkManager, so firewalld ignores it when activating zones). Additionally, the source here must be &lt;code&gt;172.0.0.0/8&lt;/code&gt; to cover any additional &lt;code&gt;docker network create&lt;/code&gt; networks later on (new bridge&amp;nbsp;networks):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo firewall-cmd --permanent --new-zone&lt;span class="o"&gt;=&lt;/span&gt;docker
+sudo firewall-cmd --permanent --zone&lt;span class="o"&gt;=&lt;/span&gt;docker --add-interface&lt;span class="o"&gt;=&lt;/span&gt;docker0
+sudo firewall-cmd --permanent --zone&lt;span class="o"&gt;=&lt;/span&gt;docker --add-source&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.0.0.0/8
+sudo firewall-cmd --permanent --zone&lt;span class="o"&gt;=&lt;/span&gt;docker --add-service&lt;span class="o"&gt;=&lt;/span&gt;dns
+sudo firewall-cmd --reload
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Please check with &lt;code&gt;sudo firewall-cmd --zone=docker --list-all&lt;/code&gt;, it should look like&amp;nbsp;this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: docker0
+  sources: 172.0.0.0/8
+  services: dns
+  ports:
+  protocols:
+  masquerade: no
+  forward-ports:
+  source-ports:
+  icmp-blocks:
+  rich rules:
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;You should now be able to run any docker container on any docker bridge network, and it should be able to use your local dns. Confirm&amp;nbsp;with:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run -it --rm busybox sh -c &lt;span class="s1"&gt;&amp;#39;cat /etc/resolv.conf &amp;amp;&amp;amp; echo &amp;amp;&amp;amp; nslookup opsech.io&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It should output something like&amp;nbsp;this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;nameserver 172.17.0.1
+
+Server:    172.17.0.1
+Address 1: 172.17.0.1
+
+Name:      opsech.io
+Address 1: 54.230.163.168 server-54-230-163-168.jax1.r.cloudfront.net
+Address 2: 54.230.163.222 server-54-230-163-222.jax1.r.cloudfront.net
+Address 3: 54.230.163.131 server-54-230-163-131.jax1.r.cloudfront.net
+Address 4: 54.230.163.234 server-54-230-163-234.jax1.r.cloudfront.net
+Address 5: 54.230.163.67 server-54-230-163-67.jax1.r.cloudfront.net
+Address 6: 54.230.163.193 server-54-230-163-193.jax1.r.cloudfront.net
+Address 7: 54.230.163.15 server-54-230-163-15.jax1.r.cloudfront.net
+Address 8: 54.230.163.138 server-54-230-163-138.jax1.r.cloudfront.net
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h5 id="additional-info-httpsgithubcommobymobyissues23910"&gt;&lt;a class="toclink" href="#additional-info-httpsgithubcommobymobyissues23910"&gt;Additional Info: &lt;a href="https://github.com/moby/moby/issues/23910"&gt;https://github.com/moby/moby/issues/23910&lt;/a&gt;&lt;/a&gt;&lt;/h5&gt;</content><category term="linux"></category><category term="fedora"></category><category term="docker"></category><category term="dns"></category><category term="NetworkManager"></category><category term="firewalld"></category></entry></feed>

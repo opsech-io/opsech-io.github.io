@@ -1,0 +1,570 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="keywords" content="nfs" />
+
+
+    <title>nfs - #> opsech.io</title>
+
+        <link rel="stylesheet" href="../theme/css/bootstrap.slate.min.css" type="text/css"/>
+
+    <link href="../theme/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="../theme/css/pygments/monokai.css" rel="stylesheet" />
+    
+        <link href="../theme/css/typogrify.css" rel="stylesheet" />
+    <link href="../theme/css/pelican-twitchy.min.css" rel="stylesheet" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <!-- Feeds -->
+        <link href="../extra/custom.css" rel="stylesheet" />
+
+<link rel="apple-touch-icon" sizes="57x57" href="/favs/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/favs/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/favs/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/favs/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/favs/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/favs/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/favs/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/favs/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/favs/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="/favs/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favs/favicon-194x194.png" sizes="194x194">
+<link rel="icon" type="image/png" href="/favs/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/favs/android-chrome-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="/favs/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="/favs/manifest.json">
+<link rel="mask-icon" href="/favs/safari-pinned-tab.svg" color="#1c1e22">
+<link rel="shortcut icon" href="/favs/favicon.ico">
+<meta name="apple-mobile-web-app-title" content="opsech.io">
+<meta name="application-name" content="opsech.io">
+<meta name="msapplication-TileColor" content="#1c1e22">
+<meta name="msapplication-TileImage" content="/favs/mstile-144x144.png">
+<meta name="msapplication-config" content="/favs/browserconfig.xml">
+<meta name="theme-color" content="#1c1e22"></head>
+<body data-spy="scroll" data-target="#scrollspy">
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper-small" class="twitchy-background">
+            <ul id="accordion-small" class="sidebar-nav sidebar-nav-small">
+                <li>
+        <a href=".." title="#> opsech.io" class="collapsed">
+            <span class="glyphicon glyphicon-home"></span>
+        </a>
+    </li>
+                <li class="nav-divider"></li>
+                <li>
+        <a href="../archives.html" title="Recent Articles" class="collapsed">
+            <span class="glyphicon glyphicon-th-list"></span>
+        </a>
+    </li>
+                
+                <li class="nav-divider"></li>
+                <li id="share-small">
+                    <a data-toggle="collapse" data-parent="#accordion-small" href="#collapse-share-small" title="Share" class="collapsed">
+                        <i class="fa fa-share-alt padding-small"></i>
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-share-small" class="collapse ">
+                    <li>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=" title="Share via Facebook" target="popup">
+                            <i class="fa fa-facebook fa-fw fa-lg padding-small"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://plus.google.com/share?url=" title="Share via Google+" target="popup">
+                            <i class="fa fa-google-plus padding-small"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/share" class="twitter-share-button" data-count="vertical" title="Share via Twitter" target="popup">
+                            <i class="fa fa-twitter fa-fw fa-lg padding-small"></i>
+                        </a>
+                    </li>
+                </ul></li>
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion-small" href="#collapse-social-small" title="Social" class="collapsed">
+                        <i class="fa fa-users padding-small"></i>
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-social-small" class="collapse ">
+                    <li>
+                        <a href="mailto:mike=at=opsech.io" title="Email"><i class="fa fa-envelope fa-fw fa-lg padding-small"></i></a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/xenithorb" title="Github"><i class="fa fa-github fa-lg fa-fw padding-small"></i></a>
+                    </li>
+                    <li>
+                        <a href="https://gitlab.com/xenithorb" title="Gitlab"><i class="fa fa-gitlab fa-lg fa-fw padding-small"></i></a>
+                    </li>
+                </ul></li>
+                <li class="nav-divider"></li>
+                <li>
+        <a href="#" title="Back to top" class="collapsed">
+            <span class="fa fa-arrow-up"></span>
+        </a>
+    </li>
+            </ul>
+        </div>
+        <div id="sidebar-wrapper" class="twitchy-background">
+            <ul id="accordion" class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="../">
+                            <span class="glyphicon glyphicon-home padding-small"></span>
+                            #> opsech.io
+                    </a>
+                </li>
+                    <li class="nav-divider"></li>
+                    <li>
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse-latest">
+                            <span class="glyphicon glyphicon-th-list padding-small"></span>
+                            Recent Articles
+                        </a>
+                    </li>
+                    <li class="panel anti-panel"><ul id="collapse-latest" class="sidebar_submenu collapse ">
+                        <li class="">
+                            <a class="hide-overflow" href="../posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" title="OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars">
+                                <i class="fa fa-file-text padding-small"></i>
+                                OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html" title="How to mount VM disk images on Fedora">
+                                <i class="fa fa-file-text padding-small"></i>
+                                How to mount VM disk images on Fedora
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../posts/2017/Jun/06/docker-cleanup-aliases-for-bash.html" title="Docker cleanup aliases for bash">
+                                <i class="fa fa-file-text padding-small"></i>
+                                Docker cleanup aliases for bash
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../posts/2017/May/23/docker-dns-with-firewalld-on-fedora.html" title="Docker DNS with FirewallD on Fedora">
+                                <i class="fa fa-file-text padding-small"></i>
+                                Docker DNS with FirewallD on Fedora
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../posts/2016/Sep/06/creating-python-3-virtual-environments-on-centos-7.html" title="Creating Python 3 Virtual Environments on Centos 7">
+                                <i class="fa fa-file-text padding-small"></i>
+                                Creating Python 3 Virtual Environments on Centos 7
+                            </a>
+                        </li>
+                    <li>
+                        <a href="../archives.html">
+                            <i class="fa fa-arrow-right padding-small"></i>
+                            More
+                        </a>
+                    </li>
+                    </ul></li>
+                <li class="nav-divider"></li>
+                <li id="share">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-share" title="Share" class="collapsed">
+                        <i class="fa fa-share-alt padding-small"></i>
+                        Share
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-share" class="sidebar_submenu collapse ">
+                    <li>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=" target="popup">
+                            <i class="fa fa-facebook fa-fw fa-lg padding-small"></i>
+                            Facebook
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://plus.google.com/share?url=" target="popup">
+                            <i class="fa fa-google-plus padding-small"></i>
+                            Google+
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/share" class="twitter-share-button" data-count="vertical" target="popup">
+                            <i class="fa fa-twitter fa-fw fa-lg padding-small"></i>
+                            Twitter
+                        </a>
+                    </li>
+                </ul></li>
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-social">
+                        <i class="fa fa-users padding-small"></i>
+                        Contact
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-social" class="sidebar_submenu collapse ">
+                    <li>
+                        <a href="mailto:mike=at=opsech.io" title="Email">
+                            <i class="fa fa-envelope fa-fw fa-lg padding-small"></i>
+                            Email
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/xenithorb" title="Github">
+                            <i class="fa fa-github fa-lg fa-fw padding-small"></i>
+                            Github
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://gitlab.com/xenithorb" title="Gitlab">
+                            <i class="fa fa-gitlab fa-lg fa-fw padding-small"></i>
+                            Gitlab
+                        </a>
+                    </li>
+                </ul></li>
+                
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-pages">
+                        <i class="fa fa-folder-open padding-small"></i>
+                        Pages
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-pages" class="sidebar_submenu collapse ">
+                    <li>
+                        <a href="../pages/the-name.html">
+                            <i class="fa fa-file-text padding-small"></i>
+                            The&nbsp;Name
+                        </a>
+                    </li>
+                </ul></li>
+                
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-categories">
+                        <i class="fa fa-folder-open padding-small"></i>
+                        Categories
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-categories" class="sidebar_submenu collapse ">
+                    <li >
+                        <a href="../category/aws.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            aws
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../category/docker.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            docker
+                            <span class="badge pull-right categorybadge">2</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../category/fixes.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            fixes
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../category/linux.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            linux
+                            <span class="badge pull-right categorybadge">6</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../category/openwrt.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            openwrt
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../category/quick-tips.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            quick-tips
+                            <span class="badge pull-right categorybadge">3</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../category/scripts.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            scripts
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                </ul></li>
+                
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-tags">
+                        <i class="fa fa-tags padding-small"></i>
+                        Tags
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-tags" class="sidebar_submenu collapse in">
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../tag/vizio.html">
+                            vizio
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2b50>]">
+                        <a href="../tag/centos.html">
+                            centos
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>]">
+                        <a href="../tag/virt.html">
+                            virt
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9b8890>]">
+                        <a href="../tag/pulseaudio.html">
+                            pulseaudio
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9419d0>, <pelican.contents.Article object at 0x7fc06fe9cb90>]">
+                        <a href="../tag/quick-tips.html">
+                            quick-tips
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>, <pelican.contents.Article object at 0x7fc06f94d610>, <pelican.contents.Article object at 0x7fc06f95a650>, <pelican.contents.Article object at 0x7fc06f99fe90>, <pelican.contents.Article object at 0x7fc06fc44590>, <pelican.contents.Article object at 0x7fc06f9419d0>, <pelican.contents.Article object at 0x7fc06fe9cb90>, <pelican.contents.Article object at 0x7fc06f9b8890>, <pelican.contents.Article object at 0x7fc06f9e1c50>, <pelican.contents.Article object at 0x7fc06f9b86d0>]">
+                        <a href="../tag/linux.html">
+                            linux
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>]">
+                        <a href="../tag/qemu.html">
+                            qemu
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1110>]">
+                        <a href="../tag/openwrt.html">
+                            openwrt
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2b50>, <pelican.contents.Article object at 0x7fc06fe9cb90>]">
+                        <a href="../tag/systemd.html">
+                            systemd
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06fc44590>]">
+                        <a href="../tag/samba.html">
+                            samba
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef51fd0>]">
+                        <a href="../tag/java.html">
+                            java
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>, <pelican.contents.Article object at 0x7fc06f95a650>, <pelican.contents.Article object at 0x7fc06f9419d0>, <pelican.contents.Article object at 0x7fc06fe9cb90>, <pelican.contents.Article object at 0x7fc06f9b8890>, <pelican.contents.Article object at 0x7fc06f9b86d0>]">
+                        <a href="../tag/fedora.html">
+                            fedora
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f98a8d0>]">
+                        <a href="../tag/s3.html">
+                            s3
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f99fe90>]">
+                        <a href="../tag/centos7.html">
+                            centos7
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f94d610>, <pelican.contents.Article object at 0x7fc06f9d2a50>]">
+                        <a href="../tag/bash.html">
+                            bash
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f95a650>, <pelican.contents.Article object at 0x7fc06f9419d0>]">
+                        <a href="../tag/dns.html">
+                            dns
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06fc44590>]">
+                        <a href="../tag/kde.html">
+                            kde
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2a50>]">
+                        <a href="../tag/tips.html">
+                            tips
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f94d610>]">
+                        <a href="../tag/containers.html">
+                            containers
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f99fe90>]">
+                        <a href="../tag/python.html">
+                            python
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef51fd0>]">
+                        <a href="../tag/ipmi.html">
+                            ipmi
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f98a8d0>]">
+                        <a href="../tag/aws.html">
+                            aws
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f98a8d0>]">
+                        <a href="../tag/cloudfront.html">
+                            cloudfront
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9b86d0>]">
+                        <a href="../tag/dnf.html">
+                            dnf
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../tag/xorg.html">
+                            xorg
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../tag/x11.html">
+                            X11
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06fc44590>]">
+                        <a href="../tag/filesharing.html">
+                            filesharing
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f99fe90>]">
+                        <a href="../tag/python3.html">
+                            python3
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../tag/nouveau.html">
+                            nouveau
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef51fd0>]">
+                        <a href="../tag/openjdk.html">
+                            openjdk
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1110>]">
+                        <a href="../tag/wifi.html">
+                            wifi
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f95a650>]">
+                        <a href="../tag/firewalld.html">
+                            firewalld
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2b50>]">
+                        <a href="../tag/nfs.html">
+                            nfs
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../tag/nvidia.html">
+                            nvidia
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f95a650>]">
+                        <a href="../tag/networkmanager.html">
+                            NetworkManager
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f94d610>, <pelican.contents.Article object at 0x7fc06f95a650>]">
+                        <a href="../tag/docker.html">
+                            docker
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1110>]">
+                        <a href="../tag/scripting.html">
+                            scripting
+                        </a>
+                    </li>
+                </ul></li>
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+        <!-- open/close sidebar -->
+        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">
+            <span id="right-arrow" class="glyphicon glyphicon-chevron-right"  title="expand sidebar"></span>
+            <span id="left-arrow" class="glyphicon glyphicon-chevron-left" title="minimize sidebar"></span>
+        </a>
+       <!-- /open/close sidebar -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+<div class="row">
+    <div class="col-lg-9">
+        <header class="page-header">
+            <h1>Articles featuring nfs</h1>
+        </header>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-9">
+            <article>
+                <h4>
+                    <time datetime="2016-01-26T15:52:10-05:00"> Tue 26 January 2016</time>
+                    <a href="../posts/2016/Jan/26/nfsv4-only-on-centos-72.html">NFSv4-Only on CentOS&nbsp;7.2</a>
+                </h4>
+            </article>
+    </div>
+</div>
+<footer>
+    <hr>
+    <div class="row">
+        <div class="col-lg-9 text-center">
+            <p><small>
+                Built by <a href="http://docs.getpelican.com/en/latest">Pelican</a> / <a href="https://github.com/ingwinlu/pelican-twitchy">pelican-twitchy</a>
+                &middot;                      <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution 4.0 International License</a>, except where indicated otherwise.
+
+            </small></p>
+        </div>
+    </div>
+</footer>            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+    </div>
+    <!-- /#wrapper -->
+    <!-- jQuery Version 1.11.2 -->
+    <script src="../theme/js/jquery-1.11.2.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../theme/js/bootstrap.min.js"></script>
+    <!-- twitchy Script -->
+    <script src="../theme/js/pelican_twitchy.min.js"></script>
+<script>
+    function FadeInOnScroll(ObjectList){
+        ObjectList.each(function(i) {
+            var bottom_of_object = $(this).position().top + $(this).outerHeight();
+            var bottom_of_window = $(window).scrollTop() + $(window).height();
+
+            if( bottom_of_window > bottom_of_object ){
+                $(this).fadeTo(750,1);
+            }
+        });
+    }
+
+    articles = $("article").fadeTo(0, 0.05);
+    FadeInOnScroll(articles)
+
+    $(window).scroll(function() {
+        FadeInOnScroll(articles)
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"><channel><title>#&gt; opsech.io - fixes</title><link>https://opsech.io/</link><description>Random wanderings of a Linux traveller</description><lastBuildDate>Fri, 09 Jun 2017 09:59:07 -0400</lastBuildDate><item><title>OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars</title><link>https://opsech.io/posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html</link><description>&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;10:00:58 up 101 days, 14:17,  1 user,  load average: 1.47, 1.07, 0.99
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It&amp;#8217;s been a few months since I last rebooted my home &lt;span class="caps"&gt;NAS&lt;/span&gt;, and I wanted to do something in the &lt;span class="caps"&gt;UEFI&lt;/span&gt; that required a full reboot and virtual console. The usual …&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mike</dc:creator><pubDate>Fri, 09 Jun 2017 09:59:07 -0400</pubDate><guid isPermaLink="false">tag:opsech.io,2017-06-09:/posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html</guid><category>java</category><category>openjdk</category><category>ipmi</category></item></channel></rss>

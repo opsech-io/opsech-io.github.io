@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#&gt; opsech.io - quick-tips</title><link href="https://opsech.io/" rel="alternate"></link><link href="https://opsech.io/feeds/quick-tips.atom.xml" rel="self"></link><id>https://opsech.io/</id><updated>2016-02-14T06:50:15-05:00</updated><entry><title>Quick Tip: Enable easy NetworkManager local DNS caching</title><link href="https://opsech.io/posts/2016/Feb/14/quick-tip-enable-easy-networkmanager-local-dns-caching.html" rel="alternate"></link><published>2016-02-14T06:50:15-05:00</published><updated>2016-02-14T06:50:15-05:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2016-02-14:/posts/2016/Feb/14/quick-tip-enable-easy-networkmanager-local-dns-caching.html</id><summary type="html">&lt;p&gt;To enable NetworkManager&amp;#8217;s feature to start &lt;code&gt;dnsmasq&lt;/code&gt; and enable dns&amp;nbsp;caching:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Add the following &lt;code&gt;dns=&lt;/code&gt; line to &lt;code&gt;/etc/NetworkManager/NetworkManager.conf&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;[main]&lt;/span&gt;
+&lt;span class="na"&gt;plugins&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;ifcfg-rh,ibft&lt;/span&gt;
+&lt;span class="na"&gt;dns&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;dnsmasq&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Install &lt;code&gt;dnmasq&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo dnf install dnsmasq
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Add some extra space to the default&amp;nbsp;cache:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo sh -c &lt;span class="s1"&gt;&amp;#39;echo &amp;quot;cache-size=1000&amp;quot; &amp;gt;&amp;gt; /etc/NetworkManager …&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;&lt;/ol&gt;</summary><content type="html">&lt;p&gt;To enable NetworkManager&amp;#8217;s feature to start &lt;code&gt;dnsmasq&lt;/code&gt; and enable dns&amp;nbsp;caching:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Add the following &lt;code&gt;dns=&lt;/code&gt; line to &lt;code&gt;/etc/NetworkManager/NetworkManager.conf&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;[main]&lt;/span&gt;
+&lt;span class="na"&gt;plugins&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;ifcfg-rh,ibft&lt;/span&gt;
+&lt;span class="na"&gt;dns&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;dnsmasq&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Install &lt;code&gt;dnmasq&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo dnf install dnsmasq
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Add some extra space to the default&amp;nbsp;cache:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo sh -c &lt;span class="s1"&gt;&amp;#39;echo &amp;quot;cache-size=1000&amp;quot; &amp;gt;&amp;gt; /etc/NetworkManager/dnsmasq.d/cache.conf&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Restart&amp;nbsp;NetworkManager:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo systemctl restart NetworkManager
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Observe the&amp;nbsp;difference:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt; i in &lt;span class="m"&gt;1&lt;/span&gt; &lt;span class="m"&gt;2&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="se"&gt;\t&lt;/span&gt;ime -f &lt;span class="s2"&gt;&amp;quot;Attempt &lt;/span&gt;&lt;span class="nv"&gt;$i&lt;/span&gt;&lt;span class="s2"&gt;: %E&amp;quot;&lt;/span&gt; nslookup &amp;lt;unvisited_domain&amp;gt; &amp;gt;/dev/null&lt;span class="p"&gt;;&lt;/span&gt;  &lt;span class="k"&gt;done&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Note: if you already have a caching resolver on your network, the impact will probably 
+be&amp;nbsp;minimal.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;</content><category term="fedora"></category><category term="dns"></category><category term="linux"></category><category term="quick-tips"></category></entry><entry><title>Fedora 23 systemd lingering processes after logout fix</title><link href="https://opsech.io/posts/2016/Jan/15/fedora-systemd-lingering-process-fix.html" rel="alternate"></link><published>2016-01-15T12:31:21-05:00</published><updated>2016-01-15T12:31:21-05:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2016-01-15:/posts/2016/Jan/15/fedora-systemd-lingering-process-fix.html</id><summary type="html">&lt;p&gt;Small tip to help after logging out of your Xsession to make sure lingering processes are&amp;nbsp;killed&lt;/p&gt;</summary><content type="html">&lt;p&gt;Annoyed by lingering processes after you logout of a Plasma or &lt;span class="caps"&gt;GNOME&lt;/span&gt;&amp;nbsp;session?&lt;/p&gt;
+&lt;p&gt;Me&amp;nbsp;too.&lt;/p&gt;
+&lt;p&gt;To&amp;nbsp;fix:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sed -i &lt;span class="s1"&gt;&amp;#39;s/^#\(KillUserProcesses=\)no$/\11/&amp;#39;&lt;/span&gt; /etc/systemd/logind.conf
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Specifically, edit &lt;code&gt;/etc/systemd/logind.conf&lt;/code&gt; and then change &lt;code&gt;#KillUserProcesses=no&lt;/code&gt;
+to &lt;code&gt;KillUserProcesses=1&lt;/code&gt;. This is particularly useful on Fedora due to the amount
+of updates, and especially if you do lots of test updates. I find myself logging-off
+frequently due to the amount of updates, since I want to make sure what&amp;#8217;s in memory
+is fresh&amp;nbsp;code.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;span class="caps"&gt;WARNING&lt;/span&gt;&lt;/strong&gt;: On server oriented systems, anything you might leave behind a &lt;code&gt;screen&lt;/code&gt;
+or &lt;code&gt;tmux&lt;/code&gt; type lingering session, this &lt;em&gt;will&lt;/em&gt; cause that to be terminated upon
+logging out of something like an &lt;span class="caps"&gt;SSH&lt;/span&gt;&amp;nbsp;session.&lt;/p&gt;</content><category term="fedora"></category><category term="linux"></category><category term="quick-tips"></category><category term="systemd"></category></entry><entry><title>Searching through $PATH commands with compgen</title><link href="https://opsech.io/posts/2015/Nov/02/list-path-with-compgen.html" rel="alternate"></link><published>2015-11-02T10:31:27-05:00</published><updated>2015-11-02T10:31:27-05:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2015-11-02:/posts/2015/Nov/02/list-path-with-compgen.html</id><summary type="html">&lt;p&gt;Learn how to list your bash $&lt;span class="caps"&gt;PATH&lt;/span&gt; with&amp;nbsp;compgen&lt;/p&gt;</summary><content type="html">&lt;p&gt;Ever wondered how to get a list of what your bash tab-completion will&amp;nbsp;output?&lt;/p&gt;
+&lt;p&gt;I tend to find this most useful when I have a brain failure and can&amp;#8217;t remember what I&amp;#8217;m looking for. Searching
+through your tab-completion with regex can be&amp;nbsp;useful:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# get a raw list of tab-complete commands and search through them yourself&lt;/span&gt;
+&lt;span class="nb"&gt;compgen&lt;/span&gt; -c &lt;span class="p"&gt;|&lt;/span&gt; egrep &lt;span class="s2"&gt;&amp;quot;&amp;lt;some_regex&amp;gt;&amp;quot;&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Analogous to `compgen -c | grep &amp;quot;^&amp;lt;word&amp;gt;&amp;quot;`&lt;/span&gt;
+&lt;span class="c1"&gt;# List commands that begin with &amp;lt;word&amp;gt;&lt;/span&gt;
+&lt;span class="nb"&gt;compgen&lt;/span&gt; -c &amp;lt;word&amp;gt;
+
+&lt;span class="c1"&gt;# List bash built-ins&lt;/span&gt;
+&lt;span class="nb"&gt;compgen&lt;/span&gt; -b
+
+&lt;span class="c1"&gt;# List all environment functions&lt;/span&gt;
+&lt;span class="nb"&gt;compgen&lt;/span&gt; -A &lt;span class="k"&gt;function&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Bonus! List functions and their source code:&lt;/span&gt;
+&lt;span class="nb"&gt;typeset&lt;/span&gt; -f &lt;span class="o"&gt;[&lt;/span&gt;&amp;lt;function_name&amp;gt;&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="bash"></category><category term="tips"></category></entry></feed>

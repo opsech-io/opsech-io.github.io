@@ -1,0 +1,657 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="author" content="Mike" />
+        <meta name="keywords" content="linux,samba,filesharing,kde" />
+        <meta name="description" content="How to share files with samba usershares and KDE Dolphin file manager (KF5/Plasma 5) - used in the context of sharing for usermode virt-manager guests." />
+
+
+    <title>Enable Samba usershares and kdenetwork-filesharing on Fedora 23 - #> opsech.io</title>
+
+        <link rel="stylesheet" href="../../../../theme/css/bootstrap.slate.min.css" type="text/css"/>
+
+    <link href="../../../../theme/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="../../../../theme/css/pygments/monokai.css" rel="stylesheet" />
+    
+        <link href="../../../../theme/css/typogrify.css" rel="stylesheet" />
+    <link href="../../../../theme/css/pelican-twitchy.min.css" rel="stylesheet" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <!-- Feeds -->
+        <link href="../../../../extra/custom.css" rel="stylesheet" />
+
+<link rel="apple-touch-icon" sizes="57x57" href="/favs/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/favs/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/favs/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/favs/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/favs/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/favs/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/favs/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/favs/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/favs/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="/favs/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favs/favicon-194x194.png" sizes="194x194">
+<link rel="icon" type="image/png" href="/favs/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/favs/android-chrome-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="/favs/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="/favs/manifest.json">
+<link rel="mask-icon" href="/favs/safari-pinned-tab.svg" color="#1c1e22">
+<link rel="shortcut icon" href="/favs/favicon.ico">
+<meta name="apple-mobile-web-app-title" content="opsech.io">
+<meta name="application-name" content="opsech.io">
+<meta name="msapplication-TileColor" content="#1c1e22">
+<meta name="msapplication-TileImage" content="/favs/mstile-144x144.png">
+<meta name="msapplication-config" content="/favs/browserconfig.xml">
+<meta name="theme-color" content="#1c1e22"></head>
+<body data-spy="scroll" data-target="#scrollspy">
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper-small" class="twitchy-background">
+            <ul id="accordion-small" class="sidebar-nav sidebar-nav-small">
+                <li>
+        <a href="../../../.." title="#> opsech.io" class="collapsed">
+            <span class="glyphicon glyphicon-home"></span>
+        </a>
+    </li>
+                <li class="nav-divider"></li>
+                <li>
+        <a href="../../../../archives.html" title="Recent Articles" class="collapsed">
+            <span class="glyphicon glyphicon-th-list"></span>
+        </a>
+    </li>
+                
+                <li class="nav-divider"></li>
+                <li id="share-small">
+                    <a data-toggle="collapse" data-parent="#accordion-small" href="#collapse-share-small" title="Share" class="collapsed">
+                        <i class="fa fa-share-alt padding-small"></i>
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-share-small" class="collapse ">
+                    <li>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=../../../../posts/2016/Apr/06/sharing-files-with-kde-and-samba.html" title="Share via Facebook" target="popup">
+                            <i class="fa fa-facebook fa-fw fa-lg padding-small"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://plus.google.com/share?url=../../../../posts/2016/Apr/06/sharing-files-with-kde-and-samba.html" title="Share via Google+" target="popup">
+                            <i class="fa fa-google-plus padding-small"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/share" class="twitter-share-button" data-count="vertical" title="Share via Twitter" target="popup">
+                            <i class="fa fa-twitter fa-fw fa-lg padding-small"></i>
+                        </a>
+                    </li>
+                </ul></li>
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion-small" href="#collapse-social-small" title="Social" class="collapsed">
+                        <i class="fa fa-users padding-small"></i>
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-social-small" class="collapse ">
+                    <li>
+                        <a href="mailto:mike=at=opsech.io" title="Email"><i class="fa fa-envelope fa-fw fa-lg padding-small"></i></a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/xenithorb" title="Github"><i class="fa fa-github fa-lg fa-fw padding-small"></i></a>
+                    </li>
+                    <li>
+                        <a href="https://gitlab.com/xenithorb" title="Gitlab"><i class="fa fa-gitlab fa-lg fa-fw padding-small"></i></a>
+                    </li>
+                </ul></li>
+                <li class="nav-divider"></li>
+                <li>
+        <a href="#" title="Back to top" class="collapsed">
+            <span class="fa fa-arrow-up"></span>
+        </a>
+    </li>
+            </ul>
+        </div>
+        <div id="sidebar-wrapper" class="twitchy-background">
+            <ul id="accordion" class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="../../../../">
+                            <span class="glyphicon glyphicon-home padding-small"></span>
+                            #> opsech.io
+                    </a>
+                </li>
+                    <li class="nav-divider"></li>
+                    <li>
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse-latest">
+                            <span class="glyphicon glyphicon-th-list padding-small"></span>
+                            Recent Articles
+                        </a>
+                    </li>
+                    <li class="panel anti-panel"><ul id="collapse-latest" class="sidebar_submenu collapse in">
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" title="OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars">
+                                <i class="fa fa-file-text padding-small"></i>
+                                OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html" title="How to mount VM disk images on Fedora">
+                                <i class="fa fa-file-text padding-small"></i>
+                                How to mount VM disk images on Fedora
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/06/docker-cleanup-aliases-for-bash.html" title="Docker cleanup aliases for bash">
+                                <i class="fa fa-file-text padding-small"></i>
+                                Docker cleanup aliases for bash
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2017/May/23/docker-dns-with-firewalld-on-fedora.html" title="Docker DNS with FirewallD on Fedora">
+                                <i class="fa fa-file-text padding-small"></i>
+                                Docker DNS with FirewallD on Fedora
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2016/Sep/06/creating-python-3-virtual-environments-on-centos-7.html" title="Creating Python 3 Virtual Environments on Centos 7">
+                                <i class="fa fa-file-text padding-small"></i>
+                                Creating Python 3 Virtual Environments on Centos 7
+                            </a>
+                        </li>
+                    <li>
+                        <a href="../../../../archives.html">
+                            <i class="fa fa-arrow-right padding-small"></i>
+                            More
+                        </a>
+                    </li>
+                    </ul></li>
+                <li class="nav-divider"></li>
+                <li id="share">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-share" title="Share" class="collapsed">
+                        <i class="fa fa-share-alt padding-small"></i>
+                        Share
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-share" class="sidebar_submenu collapse ">
+                    <li>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=../../../../posts/2016/Apr/06/sharing-files-with-kde-and-samba.html" target="popup">
+                            <i class="fa fa-facebook fa-fw fa-lg padding-small"></i>
+                            Facebook
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://plus.google.com/share?url=../../../../posts/2016/Apr/06/sharing-files-with-kde-and-samba.html" target="popup">
+                            <i class="fa fa-google-plus padding-small"></i>
+                            Google+
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/share" class="twitter-share-button" data-count="vertical" target="popup">
+                            <i class="fa fa-twitter fa-fw fa-lg padding-small"></i>
+                            Twitter
+                        </a>
+                    </li>
+                </ul></li>
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-social">
+                        <i class="fa fa-users padding-small"></i>
+                        Contact
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-social" class="sidebar_submenu collapse ">
+                    <li>
+                        <a href="mailto:mike=at=opsech.io" title="Email">
+                            <i class="fa fa-envelope fa-fw fa-lg padding-small"></i>
+                            Email
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/xenithorb" title="Github">
+                            <i class="fa fa-github fa-lg fa-fw padding-small"></i>
+                            Github
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://gitlab.com/xenithorb" title="Gitlab">
+                            <i class="fa fa-gitlab fa-lg fa-fw padding-small"></i>
+                            Gitlab
+                        </a>
+                    </li>
+                </ul></li>
+                
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-pages">
+                        <i class="fa fa-folder-open padding-small"></i>
+                        Pages
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-pages" class="sidebar_submenu collapse ">
+                    <li>
+                        <a href="../../../../pages/the-name.html">
+                            <i class="fa fa-file-text padding-small"></i>
+                            The&nbsp;Name
+                        </a>
+                    </li>
+                </ul></li>
+                
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-categories">
+                        <i class="fa fa-folder-open padding-small"></i>
+                        Categories
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-categories" class="sidebar_submenu collapse ">
+                    <li >
+                        <a href="../../../../category/aws.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            aws
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/docker.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            docker
+                            <span class="badge pull-right categorybadge">2</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/fixes.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            fixes
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="../../../../category/linux.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            linux
+                            <span class="badge pull-right categorybadge">6</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/openwrt.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            openwrt
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/quick-tips.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            quick-tips
+                            <span class="badge pull-right categorybadge">3</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/scripts.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            scripts
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                </ul></li>
+                
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-tags">
+                        <i class="fa fa-tags padding-small"></i>
+                        Tags
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-tags" class="sidebar_submenu collapse ">
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/vizio.html">
+                            vizio
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2b50>]">
+                        <a href="../../../../tag/centos.html">
+                            centos
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>]">
+                        <a href="../../../../tag/virt.html">
+                            virt
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9b8890>]">
+                        <a href="../../../../tag/pulseaudio.html">
+                            pulseaudio
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9419d0>, <pelican.contents.Article object at 0x7fc06fe9cb90>]">
+                        <a href="../../../../tag/quick-tips.html">
+                            quick-tips
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>, <pelican.contents.Article object at 0x7fc06f94d610>, <pelican.contents.Article object at 0x7fc06f95a650>, <pelican.contents.Article object at 0x7fc06f99fe90>, <pelican.contents.Article object at 0x7fc06fc44590>, <pelican.contents.Article object at 0x7fc06f9419d0>, <pelican.contents.Article object at 0x7fc06fe9cb90>, <pelican.contents.Article object at 0x7fc06f9b8890>, <pelican.contents.Article object at 0x7fc06f9e1c50>, <pelican.contents.Article object at 0x7fc06f9b86d0>]">
+                        <a href="../../../../tag/linux.html">
+                            linux
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>]">
+                        <a href="../../../../tag/qemu.html">
+                            qemu
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1110>]">
+                        <a href="../../../../tag/openwrt.html">
+                            openwrt
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2b50>, <pelican.contents.Article object at 0x7fc06fe9cb90>]">
+                        <a href="../../../../tag/systemd.html">
+                            systemd
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06fc44590>]">
+                        <a href="../../../../tag/samba.html">
+                            samba
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef51fd0>]">
+                        <a href="../../../../tag/java.html">
+                            java
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>, <pelican.contents.Article object at 0x7fc06f95a650>, <pelican.contents.Article object at 0x7fc06f9419d0>, <pelican.contents.Article object at 0x7fc06fe9cb90>, <pelican.contents.Article object at 0x7fc06f9b8890>, <pelican.contents.Article object at 0x7fc06f9b86d0>]">
+                        <a href="../../../../tag/fedora.html">
+                            fedora
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f98a8d0>]">
+                        <a href="../../../../tag/s3.html">
+                            s3
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f99fe90>]">
+                        <a href="../../../../tag/centos7.html">
+                            centos7
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f94d610>, <pelican.contents.Article object at 0x7fc06f9d2a50>]">
+                        <a href="../../../../tag/bash.html">
+                            bash
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f95a650>, <pelican.contents.Article object at 0x7fc06f9419d0>]">
+                        <a href="../../../../tag/dns.html">
+                            dns
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06fc44590>]">
+                        <a href="../../../../tag/kde.html">
+                            kde
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2a50>]">
+                        <a href="../../../../tag/tips.html">
+                            tips
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f94d610>]">
+                        <a href="../../../../tag/containers.html">
+                            containers
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f99fe90>]">
+                        <a href="../../../../tag/python.html">
+                            python
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef51fd0>]">
+                        <a href="../../../../tag/ipmi.html">
+                            ipmi
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f98a8d0>]">
+                        <a href="../../../../tag/aws.html">
+                            aws
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f98a8d0>]">
+                        <a href="../../../../tag/cloudfront.html">
+                            cloudfront
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9b86d0>]">
+                        <a href="../../../../tag/dnf.html">
+                            dnf
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/xorg.html">
+                            xorg
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/x11.html">
+                            X11
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06fc44590>]">
+                        <a href="../../../../tag/filesharing.html">
+                            filesharing
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f99fe90>]">
+                        <a href="../../../../tag/python3.html">
+                            python3
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/nouveau.html">
+                            nouveau
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef51fd0>]">
+                        <a href="../../../../tag/openjdk.html">
+                            openjdk
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1110>]">
+                        <a href="../../../../tag/wifi.html">
+                            wifi
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f95a650>]">
+                        <a href="../../../../tag/firewalld.html">
+                            firewalld
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2b50>]">
+                        <a href="../../../../tag/nfs.html">
+                            nfs
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/nvidia.html">
+                            nvidia
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f95a650>]">
+                        <a href="../../../../tag/networkmanager.html">
+                            NetworkManager
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f94d610>, <pelican.contents.Article object at 0x7fc06f95a650>]">
+                        <a href="../../../../tag/docker.html">
+                            docker
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1110>]">
+                        <a href="../../../../tag/scripting.html">
+                            scripting
+                        </a>
+                    </li>
+                </ul></li>
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+        <!-- open/close sidebar -->
+        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">
+            <span id="right-arrow" class="glyphicon glyphicon-chevron-right"  title="expand sidebar"></span>
+            <span id="left-arrow" class="glyphicon glyphicon-chevron-left" title="minimize sidebar"></span>
+        </a>
+       <!-- /open/close sidebar -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+<section id="content">
+    <article>
+        <div class="row">
+            <div class="col-lg-9">
+                <header class="page-header">
+                    <h1>
+                        <a href="../../../../posts/2016/Apr/06/sharing-files-with-kde-and-samba.html"
+                           rel="bookmark"
+                           title="Permalink to Enable Samba usershares and kdenetwork-filesharing on Fedora 23">
+                            Enable Samba usershares and kdenetwork-filesharing on Fedora&nbsp;23
+                        </a>
+                        <small>
+<div class="post-info">
+    <div class="publish-info-block">
+        <small>
+            <span class="published">
+                <i class="fa fa-calendar padding-small"></i><time datetime="2016-04-06T00:42:41-04:00"> Wed 06 April 2016</time>
+            </span>
+            <span class="category">
+                <i class="fa fa-folder-open padding-small"></i><a href="../../../../category/linux.html">linux</a>
+            </span>
+            <span class="tags">
+                <i class="fa fa-tags padding-small"></i>
+                <a href="../../../../tag/linux.html">linux</a> /                 <a href="../../../../tag/samba.html">samba</a> /                 <a href="../../../../tag/filesharing.html">filesharing</a> /                 <a href="../../../../tag/kde.html">kde</a>            </span>
+        </small>
+    </div>
+</div><!-- /.post-info -->                        </small>
+                    </h1>
+                </header>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="entry-content">
+                    <p>First a little prologue: I first found a need for this because of virt-manager/libvirt&#8217;s lacking support for a file-sharing mechanism. According to the Archlinux wiki, <a href="https://wiki.archlinux.org/index.php/QEMU#QEMU.27s_built-in_SMB_server">there&#8217;s even a default way for qemu to set this up for you</a>, but it&#8217;s not available to configure by default with libvirt or virt-manager for that&nbsp;matter.</p>
+<p>The other piece of the puzzle is that I am using user-mode networking, which means that by default, the hypervisor can not network contact guest operating systems, but the guest operating system can network contact the&nbsp;hypervisor.</p>
+<p>The last option left was to setup a samba server on my workstation, so I decided to revisit how this was done as a &#8220;user&#8221; and I was more than a little disappointed by how
+difficult it was to actually get it&nbsp;going:</p>
+<ol>
+<li>
+<p>First let&#8217;s install the necessary&nbsp;items:</p>
+<div class="highlight"><pre><span></span><span class="c1"># samba is usually already installed as a dependency</span>
+<span class="c1"># of the &quot;Printing Support&quot; or &quot;System Tools&quot; groups</span>
+sudo dnf install kdenetwork samba
+</pre></div>
+
+
+</li>
+<li>
+<p>We need to enable a SELinux&nbsp;boolean:</p>
+<div class="highlight"><pre><span></span>sudo setsebool -P samba_enable_home_dirs <span class="m">1</span>
+</pre></div>
+
+
+</li>
+<li>
+<p>Add the following to <code>/etc/samba/smb.conf</code> underneath the <code>[global]</code> heading (I put mine right above the workgroup =&nbsp;definition):</p>
+<div class="highlight"><pre><span></span>usershare allow <span class="nv">guests</span> <span class="o">=</span> <span class="nb">true</span>
+usershare max <span class="nv">shares</span> <span class="o">=</span>  <span class="m">5</span>
+usershare owner <span class="nv">only</span> <span class="o">=</span> <span class="nb">true</span>
+usershare <span class="nv">path</span> <span class="o">=</span> /var/lib/samba/shares
+</pre></div>
+
+
+</li>
+<li>
+<p>That last path that we defined above for <code>usershare path</code> that is, <code>/var/lib/samba/shares</code> needs to be created. It is not optional, and the user that you intend to be able to use this with <span class="caps">MUST</span> be able to write inside the directory. (whether by group permissions or user permissions). Bear in mind that what&#8217;s going on here is that <code>dolphin</code> is going to call <code>net usershare add</code> and that command will write a file in this path, which then <code>smb.service</code> will acquire and use as an on-the-fly share configuration. Here is my personal take on that (the path is also subjective&nbsp;too):</p>
+<div class="highlight"><pre><span></span>sudo mkdir -p /var/lib/samba/shares
+sudo groupadd shares
+sudo gpasswd -a <span class="nv">$USER</span> shares
+sudo chown root.shares /var/lib/samba/shares
+sudo chmod <span class="m">1770</span> /var/lib/samba/shares
+</pre></div>
+
+
+</li>
+<li>
+<p>Restart&nbsp;samba:</p>
+<div class="highlight"><pre><span></span>systemctl <span class="nb">enable</span> smb nmb
+systemctl restart smb nmb
+</pre></div>
+
+
+</li>
+<li>
+<p>Log out of plasma and log back&nbsp;in</p>
+</li>
+</ol>
+<p>When you return you should be able to start <code>dolphin</code> and then you should also be able to right-click a folder and go to the share tab to set various share settings. Once you click ok, it should execute behind the scenes <code>net usershare add</code> you can check if it&#8217;s working by running <code>net usershare list</code> - other errors can be sorted out by tailing ~/.xsession-errors: <code>tail -f ~/.xsession-errors</code>, then do the sharing action in dolphin again and see what it&nbsp;says.</p>
+<p>Note: A significant portion of these instructions come from <code>man smb.conf</code> and then searching for <code>usershares</code> - they give you a little hint how to get this&nbsp;going.</p>
+<h4 id="more-advice"><a class="toclink" href="#more-advice">More&nbsp;advice:</a></h4>
+<p>It&#8217;s likely that you&#8217;ll run into some permission problems, thus you come into a fork in the&nbsp;road</p>
+<ol>
+<li>
+<p>Do you really want to make your homedir <code>rwxr-xr-x (755)</code>? - No probably not, especially because most folders contained within are already <code>755</code>! That means anyone that has access to your system can read most of what&#8217;s in your&nbsp;homedir!</p>
+</li>
+<li>
+<p>Option 2 is that you need to share something outside of your homedir, I chose <code>/home/share</code> - this is likely a preferable method since you don&#8217;t have to expose your <code>$HOME</code> by storing things outside of your home&nbsp;directory.</p>
+<p>The path outside your <code>$HOME</code> also needs to be owned by this user. If it&#8217;s a multi-user system you can remove this limitation by changing <code>usershare owner only = true</code> to <code>false</code> at the expense of a security&nbsp;constraint.</p>
+<div class="highlight"><pre><span></span>sudo mkdir -p /home/share
+sudo chmod <span class="m">1775</span> /home/share
+sudo chown <span class="si">${</span><span class="nv">USER</span><span class="si">}</span>.shares
+sudo restorecon -RFv /home/share
+sudo gpasswd -a nobody shares <span class="c1"># samba will be using nobody for anon usershares</span>
+sudo systemctl restart smb
+</pre></div>
+
+
+</li>
+</ol>
+<p>Now you need to go back into dolphin and right-click <code>/home/share</code> or enter <code>/home/share</code> and then right click the folder background, then <em>Properties</em> then <em>Share</em> tab. Set options as necessary (these should be self-explanatory). <strong>Remember that on Linux with Samba, your usage is subject to both samba-level permissions, and also filesystem-level&nbsp;permissions!</strong></p>
+<p>With any luck, you should be on your way to being able to access your samba share from external machines and even also virtualized systems that have access to the&nbsp;host.</p>
+                </div>
+                <footer class="text-right">
+                    <p>- Mike</p>
+                </footer>
+            </div>
+        </div>
+    </article>
+</section>
+<footer>
+    <hr>
+    <div class="row">
+        <div class="col-lg-9 text-center">
+            <p><small>
+                Built by <a href="http://docs.getpelican.com/en/latest">Pelican</a> / <a href="https://github.com/ingwinlu/pelican-twitchy">pelican-twitchy</a>
+                &middot;                      <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution 4.0 International License</a>, except where indicated otherwise.
+
+            </small></p>
+        </div>
+    </div>
+</footer>            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+    </div>
+    <!-- /#wrapper -->
+    <!-- jQuery Version 1.11.2 -->
+    <script src="../../../../theme/js/jquery-1.11.2.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../../../../theme/js/bootstrap.min.js"></script>
+    <!-- twitchy Script -->
+    <script src="../../../../theme/js/pelican_twitchy.min.js"></script>
+
+</body>
+</html>

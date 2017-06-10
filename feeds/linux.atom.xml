@@ -1,0 +1,552 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#&gt; opsech.io - linux</title><link href="https://opsech.io/" rel="alternate"></link><link href="https://opsech.io/feeds/linux.atom.xml" rel="self"></link><id>https://opsech.io/</id><updated>2017-06-07T19:18:00-04:00</updated><entry><title>How to mount VM disk images on Fedora</title><link href="https://opsech.io/posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html" rel="alternate"></link><published>2017-06-07T19:18:00-04:00</published><updated>2017-06-07T19:18:00-04:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2017-06-07:/posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html</id><summary type="html">&lt;p&gt;There are two ways to currently mount disk images on Linux. Both of them involve using &lt;span class="caps"&gt;QEMU&lt;/span&gt; in different aspects. Both of them support the image formats that are supported by &lt;span class="caps"&gt;QEMU&lt;/span&gt; itself&amp;nbsp;&amp;#8230;&lt;/p&gt;</summary><content type="html">&lt;div class="toc"&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="#why"&gt;Why?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#notes"&gt;Notes&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#easiest-method-using-libguestfs-tools"&gt;Easiest method using&amp;nbsp;libguestfs-tools&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#harder-method-using-qemu-nbd"&gt;Harder method using&amp;nbsp;qemu-nbd&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#caveats"&gt;Caveats&lt;/a&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#using-ntfsfix-with-option-1"&gt;Using ntfsfix with option&amp;nbsp;1:&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#using-ntfsfix-with-option-2"&gt;Using ntfsfix with option&amp;nbsp;2:&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;hr /&gt;
+&lt;p&gt;There are two ways to currently mount disk images on Linux. Both of them involve using &lt;span class="caps"&gt;QEMU&lt;/span&gt; in different aspects. Both of them support the image formats that are supported by &lt;span class="caps"&gt;QEMU&lt;/span&gt; itself. I won&amp;#8217;t enumerate that list, but for practical sake, it&amp;#8217;s whatever images you&amp;#8217;re used to working with when using hypervisors like VirtualBox, Hyper-V, &lt;span class="caps"&gt;KVM&lt;/span&gt;, et&amp;nbsp;al.&lt;/p&gt;
+&lt;h3 id="why"&gt;&lt;a class="toclink" href="#why"&gt;Why?&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Perhaps you&amp;#8217;re in a situation where you need to mount an image to extract something from it, but you can&amp;#8217;t or don&amp;#8217;t want to mess around with network shares like &lt;span class="caps"&gt;NFS&lt;/span&gt; or Samba, and you need a way to transfer data to and from the virtual&amp;nbsp;machine.&lt;/p&gt;
+&lt;p&gt;Perhaps you have a failing hard drive that is dubious at best with transferring large amounts of data at once. You could attempt to use &lt;code&gt;rsync -P&lt;/code&gt; and chip away at transferring the image, in hopes that it runs and has your data intact on the destination, or you could mount it as described below and target the important data&amp;nbsp;immediately.&lt;/p&gt;
+&lt;h3 id="notes"&gt;&lt;a class="toclink" href="#notes"&gt;Notes&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;If &lt;code&gt;libguestfs-tools&lt;/code&gt; are available on your operating system, I would suggest going with this method as it was specifically intended to be used for the aforementioned task. The latter method is more of a hack taking advantage of the &lt;span class="caps"&gt;NBD&lt;/span&gt;&amp;nbsp;protocol.&lt;/p&gt;
+&lt;p&gt;Both methods involve what amounts to starting an on-the-fly virtual machine (via qemu) to read the image and export the data. Verify with &lt;code&gt;ps aux | grep qemu&lt;/code&gt; in the midst of one of the following methods if you&amp;#8217;re&amp;nbsp;curious.&lt;/p&gt;
+&lt;p&gt;The following method (#1) also has the ability to attach to a live system. This could be useful if you just want to transfer something simple that you &lt;em&gt;know will not intersect with anything on the running system&lt;/em&gt;. This implies a strict warning. I mean it, the &lt;a href="https://linux.die.net/man/3/guestfs"&gt;man page&lt;/a&gt; (ctrl+f &amp;#8220;&lt;span class="caps"&gt;ATTACH&lt;/span&gt;&amp;#8221;) literally&amp;nbsp;says:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note (1): This is highly experimental and has a tendency to eat babies. Use with&amp;nbsp;caution.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;See: &lt;code&gt;--live&lt;/code&gt; at the &lt;a href="https://linux.die.net/man/1/guestmount"&gt;guestmount man page&lt;/a&gt; for more&amp;nbsp;information.&lt;/p&gt;
+&lt;h3 id="easiest-method-using-libguestfs-tools"&gt;&lt;a class="toclink" href="#easiest-method-using-libguestfs-tools"&gt;Easiest method using&amp;nbsp;libguestfs-tools&lt;/a&gt;&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Install &lt;code&gt;libguestfs-tools&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo dnf install libguestfs-tools
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Being that we now have &lt;code&gt;libguestfs-tools&lt;/code&gt;, we have the &lt;code&gt;virt-*&lt;/code&gt; suite at our disposal. Let&amp;#8217;s take a look at what partitions are available to mount on a test &lt;code&gt;qcow2&lt;/code&gt; image.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo -i
+# cd /var/lib/libvirt/images
+# virt-filesystems -a fedora25.qcow2
+/dev/sda1
+btrfsvol:/dev/sda3/root
+btrfsvol:/dev/sda3/home
+/dev/sda3
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;We can see here that our mountable options are &lt;code&gt;sda1&lt;/code&gt; and &lt;code&gt;sda3&lt;/code&gt; - and we&amp;#8217;re probably after &lt;code&gt;sda3&lt;/code&gt; since that contains our important data. Let&amp;#8217;s mount it with &lt;code&gt;guestmount&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# guestmount -r -a fedora25.qcow2 -m /dev/sda3 /mnt/point
+# ls -l /mnt/point
+total 0
+drwxr-xr-x. 1 root root  12 Jun  3 18:12 home
+dr-xr-xr-x. 1 root root 132 Jun  3 19:38 root
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Where &lt;code&gt;-r&lt;/code&gt; is to mount the image read-only, &lt;code&gt;-m&lt;/code&gt; is the internal partition you want to mount, and &lt;code&gt;/mnt/point&lt;/code&gt; is a directory on the host filesystem that you want to mount the internal partition&amp;nbsp;to.&lt;/p&gt;
+&lt;p&gt;Here we see &lt;code&gt;home&lt;/code&gt; and &lt;code&gt;root&lt;/code&gt; directories that contain the &lt;code&gt;btrfs&lt;/code&gt; home and root subvolumes. That&amp;#8217;s because we mounted &lt;code&gt;/dev/sda3&lt;/code&gt; directly and the default subvolume to mount on a &lt;code&gt;btrfs&lt;/code&gt; filesystem is &lt;code&gt;subvol=/&lt;/code&gt; aka &lt;code&gt;subvolid=5&lt;/code&gt;. If that&amp;#8217;s not relevant or doesn&amp;#8217;t make sense to you, just note that this would ordinarily be the root of the filesystem (i.e. &lt;code&gt;/&lt;/code&gt; where &lt;code&gt;home&lt;/code&gt;, &lt;code&gt;var&lt;/code&gt;, &lt;code&gt;usr&lt;/code&gt;, &lt;code&gt;etc&lt;/code&gt;, etc live) were it not &lt;code&gt;btrfs&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;That&amp;#8217;s it! Now, when you&amp;#8217;re done, simply use &lt;code&gt;guestunmount&lt;/code&gt; to un-mount the device much in the same way you would use &lt;code&gt;umount&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# exit
+$ cd # in case we&amp;#39;re in /mnt/point
+$ sudo guestunmount /mnt/point
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="harder-method-using-qemu-nbd"&gt;&lt;a class="toclink" href="#harder-method-using-qemu-nbd"&gt;Harder method using &lt;code&gt;qemu-nbd&lt;/code&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Start off by installing &lt;code&gt;qemu-img&lt;/code&gt; and &lt;code&gt;nbd&lt;/code&gt; packages:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo dnf install qemu-img nbd
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Load the &lt;code&gt;nbd&lt;/code&gt; kernel module with option &lt;code&gt;max_part=8&lt;/code&gt;. This option is basically a required option unless your images are flat and have no internal partitions because we need that in order for it to create &lt;code&gt;nbdNpY&lt;/code&gt; devices once &lt;code&gt;nbdN&lt;/code&gt; is linked to an&amp;nbsp;image:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo modprobe nbd &lt;span class="nv"&gt;max_part&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;8&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Now let&amp;#8217;s attach the virtual image to one of the nbd&amp;nbsp;devices:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo qemu-nbd -c /dev/nbd0 /var/lib/libvirt/images/fedora25.qcow2
+$ # check dmesg for partitions indicating it was loaded properly
+$ dmesg | grep nbd0
+[348950.439938]  nbd0: p1 p2 p3
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Note: Optionally use &lt;code&gt;-r&lt;/code&gt; to export the image read-only. Or you can also use &lt;code&gt;mount -o ro&lt;/code&gt; in one of the following steps. It&amp;#8217;s probably best to be read-only at the lowest level,&amp;nbsp;however.&lt;/p&gt;
+&lt;p&gt;Here we can see &lt;code&gt;p1&lt;/code&gt; through &lt;code&gt;p3&lt;/code&gt; are active, let&amp;#8217;s explore that further&amp;nbsp;next&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Optional: check partitions with &lt;code&gt;fdisk&lt;/code&gt; or &lt;code&gt;parted&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo fdisk -l /dev/nbd0
+Disk /dev/nbd0: 20 GiB, 21474836480 bytes, 41943040 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0xf4520513
+
+Device      Boot   Start      End  Sectors Size Id Type
+/dev/nbd0p1 *       2048  2099199  2097152   1G 83 Linux
+/dev/nbd0p2      2099200  6293503  4194304   2G 82 Linux swap / Solaris
+/dev/nbd0p3      6293504 41943039 35649536  17G 83 Linux
+
+$  sudo parted /dev/nbd0 print
+Model: Unknown (unknown)
+Disk /dev/nbd0: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+Disk Flags:
+
+Number  Start   End     Size    Type     File system     Flags
+ 1      1049kB  1075MB  1074MB  primary  ext4            boot
+ 2      1075MB  3222MB  2147MB  primary  linux-swap(v1)
+ 3      3222MB  21.5GB  18.3GB  primary  btrfs
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;We will select &lt;code&gt;/dev/nbd0p3&lt;/code&gt; as our mount target, this corresponds to &lt;code&gt;/dev/sda3&lt;/code&gt; from inside the virtual machine, and is the &lt;code&gt;btrfs&lt;/code&gt; filesystem we&amp;#8217;re interested&amp;nbsp;in:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo mount /dev/nbd0p3 /mnt/point
+$ ls -l /mnt/point
+total 0
+drwxr-xr-x. 1 root root  12 Jun  3 18:12 home
+dr-xr-xr-x. 1 root root 132 Jun  3 19:38 root
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Where &lt;code&gt;/mnt/point&lt;/code&gt; is any directory on the filesystem you would like to mount&amp;nbsp;on.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Success! Now when you&amp;#8217;re done clean up&amp;nbsp;with:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ cd # in case we&amp;#39;re under /mnt/point
+$ sudo umount /mnt/point
+$ sudo qemu-nbd -d /dev/nbd0
+$ sudo modprobe -r nbd
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="caveats"&gt;&lt;a class="toclink" href="#caveats"&gt;Caveats&lt;/a&gt;&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;libguestfs: error: invalid value for backingformat parameter &amp;#8216;vdi&amp;#8217;:&lt;/strong&gt; Edit: Actually, this is &lt;a href="https://www.redhat.com/archives/libguestfs/2017-June/msg00043.html"&gt;a bug that I apparently found and reported on &lt;span class="caps"&gt;IRC&lt;/span&gt; that was fixed here&lt;/a&gt;, thanks to Richard Jones for fixing it! The gist is that it was caused by a stringent whitelist that didn&amp;#8217;t account for all image&amp;nbsp;types.&lt;/p&gt;
+&lt;p&gt;&lt;s&gt;For reasons unknown to me&lt;/s&gt; &lt;code&gt;libguestfs&lt;/code&gt;&lt;span class="quo"&gt;&amp;#8216;&lt;/span&gt;s tools sometimes work fine with images other than &lt;code&gt;qcow2&lt;/code&gt; and &lt;code&gt;raw&lt;/code&gt;, and sometimes not. For example, &lt;code&gt;virt-rescue&lt;/code&gt; and &lt;code&gt;guestmount&lt;/code&gt; seem to work with most image formats, but &lt;code&gt;virt-filesystems&lt;/code&gt; seems to support only the abovementioned two. In case you run up agasint this when intending to use &lt;code&gt;libguestfs-tools&lt;/code&gt;, use &lt;code&gt;virt-rescue&lt;/code&gt; instead and utilize the rescue shell to enumerate partitions as described during 1. on the next&amp;nbsp;caveat.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Read only file system:&lt;/strong&gt; You may get to the point after you mount the filesystem, especially with ones like &lt;code&gt;ntfs&lt;/code&gt;, where the dirty bit has been set by an unclean shutdown and the surrogate ad-hoc virtual machine that is created by &lt;code&gt;guestmount&lt;/code&gt; mounts it read-only under the hood forcefully. This is very hard to notice unless you add &lt;code&gt;-v | --verbose&lt;/code&gt; to &lt;code&gt;guestmount&lt;/code&gt;, and then you can clearly see what is going on (by contrast with method 2, when you go to manually mount it will be quite evident). Amidst all the other output, you should find toward the&amp;nbsp;end:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;commandrvf: mount -o  /dev/sda2 /sysroot/
+[    0.982901] fuse init (API version 7.26)
+The disk contains an unclean file system (0, 0).
+Metadata kept in Windows cache, refused to mount.
+Falling back to read-only mount because the NTFS partition is in an
+unsafe state. Please resume and shutdown Windows fully (no hibernation
+or fast restarting.)
+guestfsd: main_loop: proc 74 (mount_options) took 0.13 seconds
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;In this case, use the &lt;code&gt;ntfsfix&lt;/code&gt; command in order to make the filesystem properly mount. Be aware that this can be potentially dangerous, and the instructions to use windows for this should be heeded. That being said, I haven&amp;#8217;t really had any issues with it&amp;nbsp;myself:&lt;/p&gt;
+&lt;h4 id="using-ntfsfix-with-option-1"&gt;&lt;a class="toclink" href="#using-ntfsfix-with-option-1"&gt;Using &lt;code&gt;ntfsfix&lt;/code&gt; with option&amp;nbsp;1:&lt;/a&gt;&lt;/h4&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Manually start the rescue&amp;nbsp;shell:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;virt-rescue -a Windows.vdi
+...
+...
+&amp;gt;&amp;lt;rescue&amp;gt; lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sdb      8:16   0    4G  0 disk /
+sda      8:0    0   50G  0 disk
+|-sda2   8:2    0 49.5G  0 part
+`-sda1   8:1    0  500M  0 part
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use &lt;code&gt;ntfsfix&lt;/code&gt; to reset the&amp;nbsp;filesystem:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&amp;gt;&amp;lt;rescue&amp;gt; ntfsfix /dev/sda2
+Mounting volume... The disk contains an unclean file system (0, 0).
+Metadata kept in Windows cache, refused to mount.
+FAILED
+Attempting to correct errors...
+Processing $MFT and $MFTMirr...
+Reading $MFT... OK
+Reading $MFTMirr... OK
+Comparing $MFTMirr to $MFT... OK
+Processing of $MFT and $MFTMirr completed successfully.
+Setting required flags on partition... OK
+Going to empty the journal ($LogFile)... OK
+Checking the alternate boot sector... OK
+NTFS volume version is 3.1.
+NTFS partition /dev/sda2 was processed successfully.
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id="using-ntfsfix-with-option-2"&gt;&lt;a class="toclink" href="#using-ntfsfix-with-option-2"&gt;Using &lt;code&gt;ntfsfix&lt;/code&gt; with option&amp;nbsp;2:&lt;/a&gt;&lt;/h4&gt;
+&lt;ol&gt;
+&lt;li&gt;After &lt;code&gt;qemu-nbd -c /dev/nbd0 &amp;lt;image_file&amp;gt;&lt;/code&gt; do the following:&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ ntfsfix /dev/nbd0p2
+Mounting volume... The disk contains an unclean file system (0, 0).
+Metadata kept in Windows cache, refused to mount.
+FAILED
+Attempting to correct errors...
+Processing $MFT and $MFTMirr...
+Reading $MFT... OK
+Reading $MFTMirr... OK
+Comparing $MFTMirr to $MFT... OK
+Processing of $MFT and $MFTMirr completed successfully.
+Setting required flags on partition... OK
+Going to empty the journal ($LogFile)... OK
+Checking the alternate boot sector... OK
+NTFS volume version is 3.1.
+NTFS partition /dev/nbd0p2 was processed successfully.
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;You should then be able to (with both methods) mount the &lt;code&gt;ntfs&lt;/code&gt; filesystem read-write and continue&amp;nbsp;on.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;</content><category term="linux"></category><category term="fedora"></category><category term="qemu"></category><category term="virt"></category></entry><entry><title>Creating Python 3 Virtual Environments on Centos 7</title><link href="https://opsech.io/posts/2016/Sep/06/creating-python-3-virtual-environments-on-centos-7.html" rel="alternate"></link><published>2016-09-06T12:21:00-04:00</published><updated>2016-09-06T12:21:00-04:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2016-09-06:/posts/2016/Sep/06/creating-python-3-virtual-environments-on-centos-7.html</id><summary type="html">&lt;h3 id="problems"&gt;&lt;a class="toclink" href="#problems"&gt;Problems&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;There&amp;#8217;s a bug presently in CentOS 7&amp;#8217;s python2 &lt;code&gt;virtualenv&lt;/code&gt; package that breaks the ability to create python 3 virtual envs with the &lt;code&gt;python3&lt;/code&gt; binary (&lt;em&gt;from package &lt;code&gt;python34&lt;/code&gt; in &lt;abbr title="Extra Packages for Enterprise Linux, Provided by the Fedora Project"&gt;&lt;span class="caps"&gt;EPEL&lt;/span&gt;&lt;/abbr&gt;&lt;/em&gt;), making &lt;a href="https://blog.teststation.org/centos/python/2016/05/11/installing-python-virtualenv-centos-7"&gt;these otherwise useful instructions&lt;/a&gt; no longer&amp;nbsp;viable.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/pypa/virtualenv/issues/463"&gt;This bug in the virtualenv package&lt;/a&gt; prevents you from using …&lt;/p&gt;</summary><content type="html">&lt;h3 id="problems"&gt;&lt;a class="toclink" href="#problems"&gt;Problems&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;There&amp;#8217;s a bug presently in CentOS 7&amp;#8217;s python2 &lt;code&gt;virtualenv&lt;/code&gt; package that breaks the ability to create python 3 virtual envs with the &lt;code&gt;python3&lt;/code&gt; binary (&lt;em&gt;from package &lt;code&gt;python34&lt;/code&gt; in &lt;abbr title="Extra Packages for Enterprise Linux, Provided by the Fedora Project"&gt;&lt;span class="caps"&gt;EPEL&lt;/span&gt;&lt;/abbr&gt;&lt;/em&gt;), making &lt;a href="https://blog.teststation.org/centos/python/2016/05/11/installing-python-virtualenv-centos-7"&gt;these otherwise useful instructions&lt;/a&gt; no longer&amp;nbsp;viable.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/pypa/virtualenv/issues/463"&gt;This bug in the virtualenv package&lt;/a&gt; prevents you from using it with the &lt;code&gt;-p python3&lt;/code&gt; switch, and ends in something like&amp;nbsp;this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ImportError: No module named &amp;#39;_collections_abc&amp;#39;
+ERROR: The executable fo/bin/python3 is not functioning
+ERROR: It thinks sys.prefix is &amp;#39;/home/centos&amp;#39; (should be &amp;#39;/home/centos/foo&amp;#39;)
+ERROR: virtualenv is not compatible with this system or executable
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;While python3 does come with virtualenv-like functionaliy through &lt;code&gt;pyvenv&lt;/code&gt;, you can&amp;#8217;t use this as packaged by &lt;abbr title="Extra Packages for Enterprise Linux, Provided by the Fedora Project"&gt;&lt;span class="caps"&gt;EPEL&lt;/span&gt;&lt;/abbr&gt; due to &lt;code&gt;python34&lt;/code&gt; package missing &lt;code&gt;setuptools&lt;/code&gt; and other dependencies by default! Pyvenv&amp;#8217;s default behavior is to use the &lt;code&gt;ensurepip&lt;/code&gt; module to bootstrap &lt;code&gt;pip&lt;/code&gt; into the virtualenv instance, and that fails miserably with the way &lt;abbr title="Extra Packages for Enterprise Linux, Provided by the Fedora Project"&gt;&lt;span class="caps"&gt;EPEL&lt;/span&gt;&lt;/abbr&gt; packaged &lt;code&gt;python34&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="solutions"&gt;&lt;a class="toclink" href="#solutions"&gt;Solutions&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;There are three&amp;nbsp;possibilities:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Python 3 from &lt;abbr title="Extra Packages for Enterprise Linux, Provided by the Fedora Project"&gt;&lt;span class="caps"&gt;EPEL&lt;/span&gt;&lt;/abbr&gt; has &lt;code&gt;virtualenv&lt;/code&gt;-like functionality built-in with &lt;code&gt;pyvenv&lt;/code&gt;, but the people that packaged it didn&amp;#8217;t do so fully. Normally, &lt;code&gt;pyvenv&lt;/code&gt; bootstraps itself with the &lt;code&gt;ensurepip&lt;/code&gt; module, but in this instance it can&amp;#8217;t because it&amp;#8217;s missing dependencies. Instead, we use &lt;abbr title="Python Packaging Authority"&gt;PyPa&lt;/abbr&gt;&amp;#8216;s pip bootstrap&amp;nbsp;script.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo yum install epel-release
+sudo yum install python34
+pyvenv --without-pip &amp;lt;folder&amp;gt;
+&lt;span class="nb"&gt;source&lt;/span&gt; ./&amp;lt;folder&amp;gt;/bin/activate
+curl https://bootstrap.pypa.io/get-pip.py &lt;span class="p"&gt;|&lt;/span&gt; python3
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Updating the virtualenv python2 module does in fact work,&amp;nbsp;too.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo yum install epel-release
+sudo yum install python34 &lt;span class="c1"&gt;# still need this&lt;/span&gt;
+sudo pip install --upgrade virtualenv
+virtualenv -p python3 &amp;lt;folder&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I prefer option #1 over #2, despite it being more complex, because it doesn&amp;#8217;t affect any system&amp;#8217;s&amp;nbsp;packages.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;(bonus points!)&lt;/strong&gt; There is a third and even more complex option that also doesn&amp;#8217;t affect the system, using a python2 virtualenv as a bridge to patch the native virtualenv to support python3&amp;nbsp;:P&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo yum install epel-release
+sudo yum install python34
+virtualenv python2-bridge
+&lt;span class="nb"&gt;source&lt;/span&gt; ./python2-bridge/bin/active
+pip install --upgrade virtualenv
+virtualenv -p python3 &amp;lt;folder&amp;gt;
+&lt;span class="nb"&gt;source&lt;/span&gt; ./&amp;lt;folder&amp;gt;/bin/activate
+python --version &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; pip --version
+Python &lt;span class="m"&gt;3&lt;/span&gt;.4.3
+pip &lt;span class="m"&gt;8&lt;/span&gt;.1.2 from /home/centos/&amp;lt;folder&amp;gt;/lib/python3.4/site-packages &lt;span class="o"&gt;(&lt;/span&gt;python &lt;span class="m"&gt;3&lt;/span&gt;.4&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;</content><category term="python"></category><category term="linux"></category><category term="centos7"></category><category term="python3"></category></entry><entry><title>Enable Samba usershares and kdenetwork-filesharing on Fedora 23</title><link href="https://opsech.io/posts/2016/Apr/06/sharing-files-with-kde-and-samba.html" rel="alternate"></link><published>2016-04-06T00:42:41-04:00</published><updated>2016-04-06T00:42:41-04:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2016-04-06:/posts/2016/Apr/06/sharing-files-with-kde-and-samba.html</id><summary type="html">&lt;p&gt;How to share files with samba usershares and &lt;span class="caps"&gt;KDE&lt;/span&gt; Dolphin file manager (&lt;span class="caps"&gt;KF5&lt;/span&gt;/Plasma 5) - used in the context of sharing for usermode virt-manager&amp;nbsp;guests.&lt;/p&gt;</summary><content type="html">&lt;p&gt;First a little prologue: I first found a need for this because of virt-manager/libvirt&amp;#8217;s lacking support for a file-sharing mechanism. According to the Archlinux wiki, &lt;a href="https://wiki.archlinux.org/index.php/QEMU#QEMU.27s_built-in_SMB_server"&gt;there&amp;#8217;s even a default way for qemu to set this up for you&lt;/a&gt;, but it&amp;#8217;s not available to configure by default with libvirt or virt-manager for that&amp;nbsp;matter.&lt;/p&gt;
+&lt;p&gt;The other piece of the puzzle is that I am using user-mode networking, which means that by default, the hypervisor can not network contact guest operating systems, but the guest operating system can network contact the&amp;nbsp;hypervisor.&lt;/p&gt;
+&lt;p&gt;The last option left was to setup a samba server on my workstation, so I decided to revisit how this was done as a &amp;#8220;user&amp;#8221; and I was more than a little disappointed by how
+difficult it was to actually get it&amp;nbsp;going:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;First let&amp;#8217;s install the necessary&amp;nbsp;items:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# samba is usually already installed as a dependency&lt;/span&gt;
+&lt;span class="c1"&gt;# of the &amp;quot;Printing Support&amp;quot; or &amp;quot;System Tools&amp;quot; groups&lt;/span&gt;
+sudo dnf install kdenetwork samba
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;We need to enable a SELinux&amp;nbsp;boolean:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo setsebool -P samba_enable_home_dirs &lt;span class="m"&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Add the following to &lt;code&gt;/etc/samba/smb.conf&lt;/code&gt; underneath the &lt;code&gt;[global]&lt;/code&gt; heading (I put mine right above the workgroup =&amp;nbsp;definition):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;usershare allow &lt;span class="nv"&gt;guests&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;true&lt;/span&gt;
+usershare max &lt;span class="nv"&gt;shares&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;  &lt;span class="m"&gt;5&lt;/span&gt;
+usershare owner &lt;span class="nv"&gt;only&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;true&lt;/span&gt;
+usershare &lt;span class="nv"&gt;path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; /var/lib/samba/shares
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;That last path that we defined above for &lt;code&gt;usershare path&lt;/code&gt; that is, &lt;code&gt;/var/lib/samba/shares&lt;/code&gt; needs to be created. It is not optional, and the user that you intend to be able to use this with &lt;span class="caps"&gt;MUST&lt;/span&gt; be able to write inside the directory. (whether by group permissions or user permissions). Bear in mind that what&amp;#8217;s going on here is that &lt;code&gt;dolphin&lt;/code&gt; is going to call &lt;code&gt;net usershare add&lt;/code&gt; and that command will write a file in this path, which then &lt;code&gt;smb.service&lt;/code&gt; will acquire and use as an on-the-fly share configuration. Here is my personal take on that (the path is also subjective&amp;nbsp;too):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo mkdir -p /var/lib/samba/shares
+sudo groupadd shares
+sudo gpasswd -a &lt;span class="nv"&gt;$USER&lt;/span&gt; shares
+sudo chown root.shares /var/lib/samba/shares
+sudo chmod &lt;span class="m"&gt;1770&lt;/span&gt; /var/lib/samba/shares
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Restart&amp;nbsp;samba:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;systemctl &lt;span class="nb"&gt;enable&lt;/span&gt; smb nmb
+systemctl restart smb nmb
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Log out of plasma and log back&amp;nbsp;in&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;When you return you should be able to start &lt;code&gt;dolphin&lt;/code&gt; and then you should also be able to right-click a folder and go to the share tab to set various share settings. Once you click ok, it should execute behind the scenes &lt;code&gt;net usershare add&lt;/code&gt; you can check if it&amp;#8217;s working by running &lt;code&gt;net usershare list&lt;/code&gt; - other errors can be sorted out by tailing ~/.xsession-errors: &lt;code&gt;tail -f ~/.xsession-errors&lt;/code&gt;, then do the sharing action in dolphin again and see what it&amp;nbsp;says.&lt;/p&gt;
+&lt;p&gt;Note: A significant portion of these instructions come from &lt;code&gt;man smb.conf&lt;/code&gt; and then searching for &lt;code&gt;usershares&lt;/code&gt; - they give you a little hint how to get this&amp;nbsp;going.&lt;/p&gt;
+&lt;h4 id="more-advice"&gt;&lt;a class="toclink" href="#more-advice"&gt;More&amp;nbsp;advice:&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;It&amp;#8217;s likely that you&amp;#8217;ll run into some permission problems, thus you come into a fork in the&amp;nbsp;road&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Do you really want to make your homedir &lt;code&gt;rwxr-xr-x (755)&lt;/code&gt;? - No probably not, especially because most folders contained within are already &lt;code&gt;755&lt;/code&gt;! That means anyone that has access to your system can read most of what&amp;#8217;s in your&amp;nbsp;homedir!&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Option 2 is that you need to share something outside of your homedir, I chose &lt;code&gt;/home/share&lt;/code&gt; - this is likely a preferable method since you don&amp;#8217;t have to expose your &lt;code&gt;$HOME&lt;/code&gt; by storing things outside of your home&amp;nbsp;directory.&lt;/p&gt;
+&lt;p&gt;The path outside your &lt;code&gt;$HOME&lt;/code&gt; also needs to be owned by this user. If it&amp;#8217;s a multi-user system you can remove this limitation by changing &lt;code&gt;usershare owner only = true&lt;/code&gt; to &lt;code&gt;false&lt;/code&gt; at the expense of a security&amp;nbsp;constraint.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo mkdir -p /home/share
+sudo chmod &lt;span class="m"&gt;1775&lt;/span&gt; /home/share
+sudo chown &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;USER&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.shares
+sudo restorecon -RFv /home/share
+sudo gpasswd -a nobody shares &lt;span class="c1"&gt;# samba will be using nobody for anon usershares&lt;/span&gt;
+sudo systemctl restart smb
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Now you need to go back into dolphin and right-click &lt;code&gt;/home/share&lt;/code&gt; or enter &lt;code&gt;/home/share&lt;/code&gt; and then right click the folder background, then &lt;em&gt;Properties&lt;/em&gt; then &lt;em&gt;Share&lt;/em&gt; tab. Set options as necessary (these should be self-explanatory). &lt;strong&gt;Remember that on Linux with Samba, your usage is subject to both samba-level permissions, and also filesystem-level&amp;nbsp;permissions!&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;With any luck, you should be on your way to being able to access your samba share from external machines and even also virtualized systems that have access to the&amp;nbsp;host.&lt;/p&gt;</content><category term="linux"></category><category term="samba"></category><category term="filesharing"></category><category term="kde"></category></entry><entry><title>NFSv4-Only on CentOS 7.2</title><link href="https://opsech.io/posts/2016/Jan/26/nfsv4-only-on-centos-72.html" rel="alternate"></link><published>2016-01-26T15:52:10-05:00</published><updated>2016-01-26T15:52:10-05:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2016-01-26:/posts/2016/Jan/26/nfsv4-only-on-centos-72.html</id><summary type="html">&lt;p&gt;The road to a NFSv4 only server is not very clearly documented on the internet
+regarding Fedora/CentOS 7 - as the move to systemd has changed some operations of
+how &lt;code&gt;nfs.service&lt;/code&gt; pulls in configuration variables from &lt;code&gt;/etc/sysconfig/nfs&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Why should you consider doing this? If like me you …&lt;/p&gt;</summary><content type="html">&lt;p&gt;The road to a NFSv4 only server is not very clearly documented on the internet
+regarding Fedora/CentOS 7 - as the move to systemd has changed some operations of
+how &lt;code&gt;nfs.service&lt;/code&gt; pulls in configuration variables from &lt;code&gt;/etc/sysconfig/nfs&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Why should you consider doing this? If like me you run modern distributions as your
+primary &lt;span class="caps"&gt;OS&lt;/span&gt; that fully support NFSv4.1,2 out of the box. Why run all of the unnecessary
+services if, by default, the client maximizes the capable version,&amp;nbsp;anyway?&lt;/p&gt;
+&lt;p&gt;One interesting aspect is that since this a kernel-space daemon, some commands, like
+&lt;code&gt;ss -ntupl | grep 2049&lt;/code&gt; will &lt;strong&gt;&lt;em&gt;not&lt;/em&gt;&lt;/strong&gt; show the daemon&amp;#8217;s name as &lt;code&gt;knfsd&lt;/code&gt;, but rather be&amp;nbsp;blank.&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Install nfs-utils via yum, as this installs the necessary systemd units and basically everything you need to work with the kernel &lt;span class="caps"&gt;NFS&lt;/span&gt;&amp;nbsp;server:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;yum install nfs-utils
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Open up &lt;code&gt;/etc/sysconfig/nfs&lt;/code&gt; in your favorite editor and change the&amp;nbsp;following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;RPCNFSDARGS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;
+...
+&lt;span class="nv"&gt;RPCMOUNTDOPTS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;to&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;RPCNFSDARGS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-N2 -N3 -V4&amp;quot;&lt;/span&gt;
+...
+&lt;span class="c1"&gt;# -u is optional, disables UDP&lt;/span&gt;
+&lt;span class="nv"&gt;RPCMOUNTDOPTS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-N2 -N3 -V4 -u&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;I&amp;#8217;m not exactly sure why, but it would appear that there are compat issues with
+using &lt;code&gt;/etc/sysconfig/nfs&lt;/code&gt; as the &lt;code&gt;EnvironmentFile=&lt;/code&gt; directly for &lt;code&gt;nfs-server.service&lt;/code&gt; (also aliased as &lt;code&gt;nfs.service&lt;/code&gt;). As a result, now there is an ancillary service &lt;code&gt;nfs-config.service&lt;/code&gt; which &lt;strong&gt;must&lt;/strong&gt; be restarted in the event of changing &lt;code&gt;/etc/sysconfig/nfs&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;systemctl restart nfs-config
+
+&lt;span class="c1"&gt;# The following should show you the values that&lt;/span&gt;
+&lt;span class="c1"&gt;# we entered above&lt;/span&gt;
+cat /run/sysconfig/nfs
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;For good measure stop all the services that might be running (&lt;code&gt;nfs-server.service&lt;/code&gt; will start these by dependency, but not stop them. While we&amp;#8217;re at it, let&amp;#8217;s stop and disable &lt;code&gt;rpcbind.service&lt;/code&gt;,&amp;nbsp;too:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;systemctl stop &lt;span class="o"&gt;{&lt;/span&gt;rpcbind,rpc-statd,nfs-mountd,nfs-server&lt;span class="o"&gt;}&lt;/span&gt;.service
+systemctl disable rpcbind.service
+
+&lt;span class="c1"&gt;# NFSv2,3 can not start without rpcbind, if the service&lt;/span&gt;
+&lt;span class="c1"&gt;# starts, it probably worked&lt;/span&gt;
+systemctl mask rpcbind.service
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Now start &lt;code&gt;nfs-server.service&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;systemctl start nfs-server.service
+&lt;span class="c1"&gt;# If you want it permanently&lt;/span&gt;
+systemctl &lt;span class="nb"&gt;enable&lt;/span&gt; --now nfs-server.service
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Hopefully your service started. If you have the following error:
+&lt;code&gt;rpc.nfsd: unable to set any sockets for nfsd&lt;/code&gt;
+Then your nfsd is still looking for &lt;code&gt;rpcbind&lt;/code&gt; - try making sure you have the
+right vars in &lt;code&gt;/run/sysconfig/nfs&lt;/code&gt; again.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Last but not least, add some firewall rules. NFSv4 operates on port 2049. I&amp;#8217;m still using iptables instead of firewalld,&amp;nbsp;so:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# Put this somewhere below your RELATED, ESTABLISHED line&lt;/span&gt;
+&lt;span class="c1"&gt;# For me, inserting at rulenum #15 was reasonable.&lt;/span&gt;
+&lt;span class="c1"&gt;# check with `iptables -nL --line-numbers`&lt;/span&gt;
+&lt;span class="k"&gt;for&lt;/span&gt; i in udp tcp&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    -I INPUT &lt;span class="m"&gt;15&lt;/span&gt; -s &lt;span class="m"&gt;192&lt;/span&gt;.168.1.0/24 -p &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; -m &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; --dport &lt;span class="m"&gt;2049&lt;/span&gt; -m conntrack &lt;span class="se"&gt;\&lt;/span&gt;
+    --ctstate NEW -m comment --comment &lt;span class="s2"&gt;&amp;quot;NFSv4 &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="p"&gt;^^&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -j ACCEPT
+&lt;span class="k"&gt;done&lt;/span&gt;
+cp /etc/sysconfig/iptables&lt;span class="o"&gt;{&lt;/span&gt;,-&lt;span class="k"&gt;$(&lt;/span&gt;date +&lt;span class="s1"&gt;&amp;#39;%F-%H.old&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+iptables-save &amp;gt; /etc/sysconfig/iptables
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;</content><category term="nfs"></category><category term="centos"></category><category term="systemd"></category></entry><entry><title>Adding DRC to pulseaudio on Fedora 23</title><link href="https://opsech.io/posts/2015/Nov/06/dynamic-range-compression-linux-pulseaudio.html" rel="alternate"></link><published>2015-11-06T14:21:06-05:00</published><updated>2016-01-17T18:49:51-05:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2015-11-06:/posts/2015/Nov/06/dynamic-range-compression-linux-pulseaudio.html</id><summary type="html">&lt;p&gt;Showcasing an easy way to enable &lt;abbr title="Dynamic Range Compression"&gt;&lt;span class="caps"&gt;DRC&lt;/span&gt;&lt;/abbr&gt;-like &lt;span class="caps"&gt;LADSPA&lt;/span&gt;-plugin&amp;nbsp;functionality&lt;/p&gt;</summary><content type="html">&lt;p&gt;One of the few things greatly missed from my time using Windows as a media &lt;span class="caps"&gt;PC&lt;/span&gt; was
+its easy ability to enable &lt;abbr title="Dynamic Range Compression"&gt;&lt;span class="caps"&gt;DRC&lt;/span&gt;&lt;/abbr&gt;. This is a post-processing effect that basically
+compresses the audio stream so that extreme louds and extreme softs have a shorter
+range, and thus are easier to percieve by the human ear. (think back to being easily
+able to hear a door or footsteps in a video, but not the actor speak, or music thats
+arbitrarily loud between&amp;nbsp;tracks.)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/bash&lt;/span&gt;
+&lt;span class="nb"&gt;set&lt;/span&gt; -e
+
+sudo dnf install ladspa-swh-plugins
+
+&lt;span class="c1"&gt;# Making an assumption here about the first listed sink being the right one&lt;/span&gt;
+&lt;span class="nv"&gt;FIRST_SINK&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;pacmd list-sinks &lt;span class="p"&gt;|&lt;/span&gt; grep name: &lt;span class="p"&gt;|&lt;/span&gt; awk -F&lt;span class="s1"&gt;&amp;#39;[&amp;lt;&amp;gt;]&amp;#39;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;NR==1 {print $2}&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# WARNING: this will remove your current default.pa if you configured one&lt;/span&gt;
+&lt;span class="c1"&gt;# One should not exist by default, and this will create a new one&lt;/span&gt;
+cat &lt;span class="s"&gt;&amp;lt;&amp;lt;EOF &amp;gt; ~/.config/pulse/default.pa&lt;/span&gt;
+&lt;span class="s"&gt;$(cat /etc/pulse/default.pa)&lt;/span&gt;
+
+&lt;span class="s"&gt;## FOR DYNAMIC RANGE COMPRESSION - Replace ${FIRST_SINK} if this doesn&amp;#39;t work&lt;/span&gt;
+&lt;span class="s"&gt;load-module module-ladspa-sink sink_name=ladspa_normalized master=${FIRST_SINK} plugin=fast_lookahead_limiter_1913 label=fastLookaheadLimiter control=10,0,0.8&lt;/span&gt;
+&lt;span class="s"&gt;load-module module-ladspa-sink sink_name=ladspa_dyson master=ladspa_normalized plugin=dyson_compress_1403 label=dysonCompress control=0,1,0.5,0.99&lt;/span&gt;
+&lt;span class="s"&gt;EOF&lt;/span&gt;
+
+pulseaudio -k
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You should now use &lt;code&gt;pavucontrol&lt;/code&gt; (the &lt;span class="caps"&gt;KDE&lt;/span&gt; phonon config kind of wonks out when 
+you restart pulseaudio) to check to see if the proper sinks are&amp;nbsp;active.&lt;/p&gt;
+&lt;p&gt;Again, with &lt;span class="caps"&gt;KDE&lt;/span&gt;, you&amp;#8217;ll need to &lt;strong&gt;log out&lt;/strong&gt;, then when you log back in, go to 
+&lt;em&gt;System Settings -&amp;gt; Multimedia -&amp;gt; Audio and Video&lt;/em&gt; and configure the order for 
+the sinks to actually be used. It is the first sink in the chain that should be 
+preferred, so &amp;#8220;prefer&amp;#8221; &amp;#8220;&lt;span class="caps"&gt;LADSPA&lt;/span&gt; Plugin Dyson compressor on &lt;span class="caps"&gt;LADSPA&lt;/span&gt; Plugin Fast 
+Lookahead limiter on &lt;your_master_audio_device&gt;&amp;#8221; to the top, where 
+&lt;your_master_audio_device&gt; is actually the one that should be your primary output 
+device. &lt;strong&gt;If this device is incorrect:&lt;/strong&gt; Then, &lt;code&gt;${FIRST_SINK}&lt;/code&gt; in the script above 
+is incorrect. Copy this order to the other device lists if you wish. (In &lt;span class="caps"&gt;KDE&lt;/span&gt; there 
+are different device orders for music, video, notifications,&amp;nbsp;etc)&lt;/p&gt;
+&lt;p&gt;Remember that the way this works is the audio passes to the first sync &lt;strong&gt;ladspa_normalized&lt;/strong&gt;, 
+then to the next sink, &lt;strong&gt;ladspa_dyson&lt;/strong&gt;, then to the actual audio device. The first sink 
+normalizes it, the second sink sink compresses the dynamic range of the audio. The first 
+sink isn&amp;#8217;t&amp;nbsp;mandatory.&lt;/p&gt;</content><category term="pulseaudio"></category><category term="fedora"></category><category term="linux"></category></entry><entry><title>Nouveau: Setting custom modes [to force VIZIO tv into 4:4:4 chroma]</title><link href="https://opsech.io/posts/2015/Nov/03/nouveau-custom-modes-xrandr.html" rel="alternate"></link><published>2015-11-03T14:34:21-05:00</published><updated>2015-11-03T14:34:21-05:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2015-11-03:/posts/2015/Nov/03/nouveau-custom-modes-xrandr.html</id><summary type="html">&lt;p&gt;If you&amp;#8217;ve found this intentionally, I don&amp;#8217;t have to explain why you want this infomation, so
+just skip down to the code snippet area. For everyone else, I&amp;#8217;m sure you probably
+want to know, &amp;#8220;Why?&amp;#8221; - Let me direct your attention here: &lt;a href="http://www.avsforum.com/forum/166-lcd-flat-panel-displays/1381724-official-4-4-4-chroma-subsampling-thread.html"&gt;http://www.avsforum.com/forum/166-lcd-flat-panel-displays …&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;If you&amp;#8217;ve found this intentionally, I don&amp;#8217;t have to explain why you want this infomation, so
+just skip down to the code snippet area. For everyone else, I&amp;#8217;m sure you probably
+want to know, &amp;#8220;Why?&amp;#8221; - Let me direct your attention here: &lt;a href="http://www.avsforum.com/forum/166-lcd-flat-panel-displays/1381724-official-4-4-4-chroma-subsampling-thread.html"&gt;http://www.avsforum.com/forum/166-lcd-flat-panel-displays/1381724-official-4-4-4-chroma-subsampling-thread.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;4:4:4 Chroma is something that we tend to take for granted with computer oriented
+displays, but something that is often a pain to enable on a panel marketed as a &lt;span class="caps"&gt;TV&lt;/span&gt;.
+Basically it means that all of the color information is being passed through to
+the display panel without being compressed. A technical explanation is best found
+at the above&amp;nbsp;link.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Here is an example of a quick test you can look at to detect if proper chroma information is being passed. If the red looks blury instead of like all the other lines, you are probably looking at 4:2:2 or worse." src="https://opsech.io/images/lcd_chroma_test.png" /&gt;&lt;/p&gt;
+&lt;p&gt;There&amp;#8217;s a &amp;#8220;bug&amp;#8221; or &amp;#8220;feature&amp;#8221; in some &lt;span class="caps"&gt;VIZIO&lt;/span&gt; &lt;span class="caps"&gt;TV&lt;/span&gt;&amp;#8217;s where if you push the pixel clock
+past a certain normal level, it causes the &lt;span class="caps"&gt;TV&lt;/span&gt;&amp;#8217;s firmware to put it into
+a custom resolution mode. You can tell this because when you press the &amp;#8220;guide&amp;#8221;
+button on the &lt;span class="caps"&gt;TV&lt;/span&gt; remote, &lt;strong&gt;you will see a custom resolution&lt;/strong&gt; that looks more like
+something you see on a comptuer, instead of the familiar &amp;#8220;1080p&amp;#8221;, &amp;#8220;720p&amp;#8221;&amp;nbsp;etc.&lt;/p&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="See the &amp;quot;1920x1080&amp;quot; above." src="https://opsech.io/images/vizio_tv_header.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;First, test to see if your mode works for you. After executing the following commands,
+the screen should blank and assume the new refresh rate after the &lt;code&gt;--output&lt;/code&gt; command.&lt;/p&gt;
+&lt;p&gt;This is &amp;#8220;61Hz&amp;#8221; for a 50&amp;#8221;&amp;nbsp;D500i:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;xrandr --newmode &lt;span class="s2"&gt;&amp;quot;1920x1080_61&amp;quot;&lt;/span&gt; &lt;span class="m"&gt;151&lt;/span&gt; &lt;span class="m"&gt;1920&lt;/span&gt; &lt;span class="m"&gt;2008&lt;/span&gt; &lt;span class="m"&gt;2052&lt;/span&gt; &lt;span class="m"&gt;2200&lt;/span&gt; &lt;span class="m"&gt;1080&lt;/span&gt; &lt;span class="m"&gt;1084&lt;/span&gt; &lt;span class="m"&gt;1089&lt;/span&gt; &lt;span class="m"&gt;1125&lt;/span&gt; +Hsync +Vsync
+xrandr --addmode HDMI-1 &lt;span class="s2"&gt;&amp;quot;1920x1080_61&amp;quot;&lt;/span&gt;
+xrandr --output HDMI-1 --mode &lt;span class="s2"&gt;&amp;quot;1920x1080_61&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;At first I had some difficulty getting this mode to be accepted by Xorg, mostly due
+to my own ignorance on configuring the server (how pampered we&amp;#8217;ve been with
+automatically configured X!). The key was to realize that the traditional way of
+simply putting a modeline into the &amp;#8220;Monitor&amp;#8221; section and then calling it in the
+&amp;#8220;Display&amp;#8221; section under screen wasn&amp;#8217;t going to cut&amp;nbsp;it.&lt;/p&gt;
+&lt;p&gt;What we need to do is make sure that we have the necessary &lt;em&gt;ModeLine&lt;/em&gt; present
+under the &amp;#8220;Monitor&amp;#8221; section, set &lt;code&gt;Option "PreferredMode" "1920x1080_61"&lt;/code&gt; which
+takes precedence over any &lt;span class="caps"&gt;EDID&lt;/span&gt; information. Then, we link our monitor&amp;nbsp;(Monitor0)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c"&gt;# Custom X11 config for VIZIO TV to force 4:4:4 chroma by&lt;/span&gt;
+&lt;span class="c"&gt;# tricking the pixel clock into turing the tv pre-processor off&lt;/span&gt;
+
+&lt;span class="nb"&gt;Section&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Monitor&amp;quot;&lt;/span&gt;
+        &lt;span class="nb"&gt;Identifier&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Monitor0&amp;quot;&lt;/span&gt;
+        &lt;span class="nb"&gt;Option&lt;/span&gt;      &lt;span class="s2"&gt;&amp;quot;DPMS&amp;quot;&lt;/span&gt;
+        &lt;span class="nb"&gt;ModeLine&lt;/span&gt;   &lt;span class="s2"&gt;&amp;quot;1920x1080_61&amp;quot;&lt;/span&gt; &lt;span class="m"&gt;151&lt;/span&gt; &lt;span class="m"&gt;1920&lt;/span&gt; &lt;span class="m"&gt;2008&lt;/span&gt; &lt;span class="m"&gt;2052&lt;/span&gt; &lt;span class="m"&gt;2200&lt;/span&gt; &lt;span class="m"&gt;1080&lt;/span&gt; &lt;span class="m"&gt;1084&lt;/span&gt; &lt;span class="m"&gt;1089&lt;/span&gt; &lt;span class="m"&gt;1125&lt;/span&gt; +Hsync +Vsync
+        &lt;span class="nb"&gt;Option&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PreferredMode&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;1920x1080_61&amp;quot;&lt;/span&gt;
+&lt;span class="nb"&gt;EndSection&lt;/span&gt;
+
+Section &lt;span class="s2"&gt;&amp;quot;Device&amp;quot;&lt;/span&gt;
+        &lt;span class="nb"&gt;Identifier&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Device0&amp;quot;&lt;/span&gt;
+        &lt;span class="nb"&gt;Driver&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;nouveau&amp;quot;&lt;/span&gt;
+        &lt;span class="nb"&gt;Option&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Monitor-HDMI-1&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Monitor0&amp;quot;&lt;/span&gt;
+&lt;span class="nb"&gt;EndSection&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You should now be able to start your favorite &lt;span class="caps"&gt;DE&lt;/span&gt; and set the mode/refresh manually if it hasn&amp;#8217;t already done&amp;nbsp;so.&lt;/p&gt;</content><category term="linux"></category><category term="nouveau"></category><category term="nvidia"></category><category term="vizio"></category><category term="xorg"></category><category term="X11"></category></entry></feed>

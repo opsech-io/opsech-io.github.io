@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#&gt; opsech.io - scripts</title><link href="https://opsech.io/" rel="alternate"></link><link href="https://opsech.io/feeds/scripts.atom.xml" rel="self"></link><id>https://opsech.io/</id><updated>2015-10-28T13:10:42-04:00</updated><entry><title>How to view latest changelog entries for dnf updates</title><link href="https://opsech.io/posts/2015/Oct/28/dnf-updates-changelog.html" rel="alternate"></link><published>2015-10-28T10:09:28-04:00</published><updated>2015-10-28T13:10:42-04:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2015-10-28:/posts/2015/Oct/28/dnf-updates-changelog.html</id><summary type="html">&lt;p&gt;A simple script for reading the latest changelog entries for dnf (and therefore rpm)&amp;nbsp;packages.&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;abbr title="Dandified Yum"&gt;&lt;span class="caps"&gt;DNF&lt;/span&gt;&lt;/abbr&gt; seems to be missing a proper &lt;a href="http://linux.die.net/man/1/yum-changelog"&gt;yum-changelog&lt;/a&gt; plugin,
+so I wrote this tiny script to help me understand what had changed and why (only works after&amp;nbsp;installed).&lt;/p&gt;
+&lt;p&gt;It outputs a header for each updated package based on &lt;code&gt;dnf history info '*'&lt;/code&gt; and highlights &lt;span class="caps"&gt;CVE&lt;/span&gt; updates in red (on the console) for higher&amp;nbsp;visibility.&lt;/p&gt;
+&lt;p&gt;Usage &lt;code&gt;bash dnf_changelog.sh [&amp;lt;history id&amp;gt;]&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/bash&lt;/span&gt;
+&lt;span class="c1"&gt;# Read in latest updated packages (post install) and show just most recent&lt;/span&gt;
+&lt;span class="c1"&gt;# changelog entries for those packages&lt;/span&gt;
+&lt;span class="c1"&gt;#set -ux&lt;/span&gt;
+&lt;span class="nv"&gt;LAST_UPDATE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt; sudo dnf &lt;span class="nb"&gt;history&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; awk -F&lt;span class="s1"&gt;&amp;#39;|&amp;#39;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;$4 ~ /([ ]+U|Update)/{print $1; exit}&amp;#39;&lt;/span&gt; &lt;span class="k"&gt;)&lt;/span&gt;
+
+sudo dnf &lt;span class="nb"&gt;history&lt;/span&gt; info &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;1&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;LAST_UPDATE&lt;/span&gt;&lt;span class="si"&gt;}}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+    &lt;span class="p"&gt;|&lt;/span&gt; awk &lt;span class="s1"&gt;&amp;#39;/Upgraded[ ]+/{ gsub(&amp;quot;[-][0-9]*[-]?[0-9]+[.:].*&amp;quot;,&amp;quot;&amp;quot;,$2); pkg = $2 } /Upgrade[ ]+/{ OFS=&amp;quot;&amp;quot;; print pkg,&amp;quot;-&amp;quot;,$2 }&amp;#39;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+    &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="nb"&gt;read&lt;/span&gt; -r a&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+        &lt;span class="nv"&gt;count&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
+        &lt;span class="nb"&gt;echo&lt;/span&gt; -e &lt;span class="s2"&gt;&amp;quot;\e[1;32m###### CHANGELOG FOR: &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;a&lt;/span&gt;&lt;span class="p"&gt;^^&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt; ######\e[0m\n&amp;quot;&lt;/span&gt;
+        rpm -q --changelog &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+            &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="nb"&gt;read&lt;/span&gt; -r b&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+
+                &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;[[&lt;/span&gt; &lt;span class="nv"&gt;$b&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;~ ^&lt;span class="se"&gt;\*&lt;/span&gt; &lt;span class="o"&gt;]]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt;
+                    &lt;span class="o"&gt;((&lt;/span&gt;count++&lt;span class="o"&gt;))&lt;/span&gt;
+                &lt;span class="k"&gt;fi&lt;/span&gt;
+
+                &lt;span class="o"&gt;[[&lt;/span&gt; &lt;span class="nv"&gt;$count&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="m"&gt;2&lt;/span&gt; &lt;span class="o"&gt;]]&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nb"&gt;break&lt;/span&gt;
+                &lt;span class="nv"&gt;CVE_REGEX&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;CVE-[0-9]{4}-[0-9]{4}&amp;quot;&lt;/span&gt;
+                &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;[[&lt;/span&gt; &lt;span class="nv"&gt;$b&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;~ .*&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CVE_REGEX&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.* &lt;span class="o"&gt;]]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt;
+                    &lt;span class="nv"&gt;C_R&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;$&amp;#39;\033[1;31m&amp;#39;&lt;/span&gt;
+                    &lt;span class="nv"&gt;C_N&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;$&amp;#39;\033[0m&amp;#39;&lt;/span&gt;
+                    &lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$b&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; sed -r &lt;span class="s1"&gt;&amp;#39;s|(&amp;#39;&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CVE_REGEX&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;)|&amp;#39;&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$C_R&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;\1&amp;#39;&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$C_N&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;|&amp;#39;&lt;/span&gt;
+                &lt;span class="k"&gt;else&lt;/span&gt;
+                    &lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$b&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+                &lt;span class="k"&gt;fi&lt;/span&gt;
+
+              &lt;span class="k"&gt;done&lt;/span&gt;
+      &lt;span class="k"&gt;done&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+    &lt;span class="p"&gt;|&lt;/span&gt; less -r
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Example&amp;nbsp;output:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Here's an example of my last update, here you can see the titles are green and any CVEs mentioned in the log will be highlighted red." src="https://opsech.io/images/dnf_changelog.png" /&gt;&lt;/p&gt;</content><category term="linux"></category><category term="fedora"></category><category term="dnf"></category></entry></feed>

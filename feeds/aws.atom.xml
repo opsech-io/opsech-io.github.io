@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#&gt; opsech.io - aws</title><link href="https://opsech.io/" rel="alternate"></link><link href="https://opsech.io/feeds/aws.atom.xml" rel="self"></link><id>https://opsech.io/</id><updated>2015-11-02T19:51:32-05:00</updated><entry><title>Using s3cmd to sync and invalidate cloudfront content on AWS</title><link href="https://opsech.io/posts/2015/Nov/02/s3cmd-sync-and-cf-invalidation.html" rel="alternate"></link><published>2015-11-02T19:51:32-05:00</published><updated>2015-11-02T19:51:32-05:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2015-11-02:/posts/2015/Nov/02/s3cmd-sync-and-cf-invalidation.html</id><summary type="html">&lt;p&gt;How to use s3cmd to upload static content (in this case, generated with pelican) and have s3cmd do the heavy lifting with also invalidating CloudFront paths for&amp;nbsp;you.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently, working with &lt;a href="http://s3tools.org/download"&gt;&lt;code&gt;s3cmd&lt;/code&gt;&lt;/a&gt; has been difficult because the command suffers from a lack of documentation regarding the &lt;span class="caps"&gt;AWS&lt;/span&gt; policy requirements the software needs to perform its duties. The following is a policy configuration for &lt;em&gt;S3&lt;/em&gt; and &lt;em&gt;CloudFront&lt;/em&gt; that enumerates what I &lt;em&gt;hope&lt;/em&gt; are the minimum requirements that s3cmd needs to deploy a static site to S3 while also invalidating CloudFront paths at the same time. I established these policies through trial and&amp;nbsp;error.&lt;/p&gt;
+&lt;p&gt;A key component is to notice that when assigning the S3 user&amp;#8217;s policy, you &lt;em&gt;must&lt;/em&gt; ensure that you both allow access to the bucket objects with &lt;code&gt;"arn:aws:s3:::bucket/*",&lt;/code&gt; &lt;strong&gt;as well as&lt;/strong&gt;  &lt;code&gt;"arn:aws:s3:::bucket"&lt;/code&gt; (note the first example has a trailing &amp;#8216;/*&amp;#8217; and the following doesn&amp;#8217;t) - for some reason this is necessary for the &lt;code&gt;--cf-invalidate&lt;/code&gt; option to work with &lt;code&gt;s3cmd&lt;/code&gt;, and was the most diffuclt part in getting this to work&amp;nbsp;correctly.&lt;/p&gt;
+&lt;p&gt;The resultant command to publish the website with Pelican&amp;#8217;s Makefile is &lt;code&gt;make s3_upload&lt;/code&gt; and now looks as&amp;nbsp;follows:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;s3_upload&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;publish&lt;/span&gt;
+        s3cmd sync &lt;span class="k"&gt;$(&lt;/span&gt;OUTPUTDIR&lt;span class="k"&gt;)&lt;/span&gt;/ s3://&lt;span class="k"&gt;$(&lt;/span&gt;S3_BUCKET&lt;span class="k"&gt;)&lt;/span&gt; --acl-public --delete-removed &lt;span class="se"&gt;\&lt;/span&gt;
+        --guess-mime-type --no-mime-magic --no-preserve --cf-invalidate
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;S3 Tangent&lt;/strong&gt;: &lt;code&gt;--no-mime-magic&lt;/code&gt; is not a default option either, it is required in order to avoid a broken libmagic library setting the wrong &lt;span class="caps"&gt;MIME&lt;/span&gt; header in s3. If you don&amp;#8217;t use this, you&amp;#8217;ll be serving &lt;span class="caps"&gt;CSS&lt;/span&gt; content as text and your website will be broken. Additionally, &lt;code&gt;--no-preserve&lt;/code&gt; is important because s3cmd was built with file preservation in mind, and will set a custom header for each object that stores sensitive information, such as &lt;span class="caps"&gt;UID&lt;/span&gt; and &lt;span class="caps"&gt;GID&lt;/span&gt; of the uploader. This is beneficial when archiving files (because it acts more like tar), but not so useful when trying to serve a&amp;nbsp;website.&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h4 id="iam-policies"&gt;&lt;a class="toclink" href="#iam-policies"&gt;&lt;strong&gt;&lt;span class="caps"&gt;IAM&lt;/span&gt;&amp;nbsp;Policies:&lt;/strong&gt;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;CloudFront policy&amp;nbsp;configuration:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;Version&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;2012-10-17&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;Statement&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;Sid&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Stmt1446510379000&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;Effect&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Allow&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;Action&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;cloudfront:CreateInvalidation&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;cloudfront:GetCloudFrontOriginAccessIdentity&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;cloudfront:GetCloudFrontOriginAccessIdentityConfig&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;cloudfront:GetDistribution&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;cloudfront:GetDistributionConfig&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;cloudfront:GetInvalidation&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;cloudfront:ListDistributions&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;cloudfront:ListInvalidations&amp;quot;&lt;/span&gt;
+            &lt;span class="p"&gt;],&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;Resource&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;*&amp;quot;&lt;/span&gt;
+            &lt;span class="p"&gt;]&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h6 id="reminder-there-are-no-arns-for-cloudfront-simply-use"&gt;&lt;a class="toclink" href="#reminder-there-are-no-arns-for-cloudfront-simply-use"&gt;&lt;em&gt;Reminder&lt;/em&gt;: &lt;a href="http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/UsingWithIAM.html#CloudFront_ARN_Format"&gt;There are no &lt;abbr title="Amazon Resource Name"&gt;ARNs&lt;/abbr&gt; for CloudFront&lt;/a&gt;, simply use&amp;nbsp;&amp;#8216;*&amp;#8217;&lt;/a&gt;&lt;/h6&gt;
+&lt;p&gt;S3 Bucket policy&amp;nbsp;configuration:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;Version&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;2012-10-17&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;Statement&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;Sid&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Stmt1446509955000&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;Effect&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Allow&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;Action&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;s3:DeleteObject&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;s3:GetBucketLocation&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;s3:GetBucketWebsite&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;s3:GetObject&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;s3:GetObjectAcl&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;s3:ListBucket&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;s3:PutObject&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;s3:PutObjectAcl&amp;quot;&lt;/span&gt;
+            &lt;span class="p"&gt;],&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;Resource&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;arn:aws:s3:::bucket/*&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;arn:aws:s3:::bucket&amp;quot;&lt;/span&gt;
+            &lt;span class="p"&gt;]&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="aws"></category><category term="cloudfront"></category><category term="s3"></category></entry></feed>

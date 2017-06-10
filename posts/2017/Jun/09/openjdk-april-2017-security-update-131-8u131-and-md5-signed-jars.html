@@ -1,0 +1,645 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="author" content="Mike" />
+        <meta name="keywords" content="java,openjdk,ipmi" />
+        <meta name="description" content="10:00:58 up 101 days, 14:17, 1 user, load average: 1.47, 1.07, 0.99 It’s been a few months since I last rebooted my home NAS, and I wanted to do something in the UEFI that required a full reboot and virtual console. The usual …" />
+
+
+    <title>OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars - #> opsech.io</title>
+
+        <link rel="stylesheet" href="../../../../theme/css/bootstrap.slate.min.css" type="text/css"/>
+
+    <link href="../../../../theme/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="../../../../theme/css/pygments/monokai.css" rel="stylesheet" />
+    
+        <link href="../../../../theme/css/typogrify.css" rel="stylesheet" />
+    <link href="../../../../theme/css/pelican-twitchy.min.css" rel="stylesheet" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <!-- Feeds -->
+        <link href="../../../../extra/custom.css" rel="stylesheet" />
+
+<link rel="apple-touch-icon" sizes="57x57" href="/favs/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/favs/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/favs/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/favs/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/favs/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/favs/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/favs/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/favs/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/favs/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="/favs/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favs/favicon-194x194.png" sizes="194x194">
+<link rel="icon" type="image/png" href="/favs/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/favs/android-chrome-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="/favs/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="/favs/manifest.json">
+<link rel="mask-icon" href="/favs/safari-pinned-tab.svg" color="#1c1e22">
+<link rel="shortcut icon" href="/favs/favicon.ico">
+<meta name="apple-mobile-web-app-title" content="opsech.io">
+<meta name="application-name" content="opsech.io">
+<meta name="msapplication-TileColor" content="#1c1e22">
+<meta name="msapplication-TileImage" content="/favs/mstile-144x144.png">
+<meta name="msapplication-config" content="/favs/browserconfig.xml">
+<meta name="theme-color" content="#1c1e22"></head>
+<body data-spy="scroll" data-target="#scrollspy">
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper-small" class="twitchy-background">
+            <ul id="accordion-small" class="sidebar-nav sidebar-nav-small">
+                <li>
+        <a href="../../../.." title="#> opsech.io" class="collapsed">
+            <span class="glyphicon glyphicon-home"></span>
+        </a>
+    </li>
+                <li class="nav-divider"></li>
+                <li>
+        <a href="../../../../archives.html" title="Recent Articles" class="collapsed">
+            <span class="glyphicon glyphicon-th-list"></span>
+        </a>
+    </li>
+                
+                <li class="nav-divider"></li>
+                <li id="share-small">
+                    <a data-toggle="collapse" data-parent="#accordion-small" href="#collapse-share-small" title="Share" class="collapsed">
+                        <i class="fa fa-share-alt padding-small"></i>
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-share-small" class="collapse ">
+                    <li>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=../../../../posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" title="Share via Facebook" target="popup">
+                            <i class="fa fa-facebook fa-fw fa-lg padding-small"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://plus.google.com/share?url=../../../../posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" title="Share via Google+" target="popup">
+                            <i class="fa fa-google-plus padding-small"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/share" class="twitter-share-button" data-count="vertical" title="Share via Twitter" target="popup">
+                            <i class="fa fa-twitter fa-fw fa-lg padding-small"></i>
+                        </a>
+                    </li>
+                </ul></li>
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion-small" href="#collapse-social-small" title="Social" class="collapsed">
+                        <i class="fa fa-users padding-small"></i>
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-social-small" class="collapse ">
+                    <li>
+                        <a href="mailto:mike=at=opsech.io" title="Email"><i class="fa fa-envelope fa-fw fa-lg padding-small"></i></a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/xenithorb" title="Github"><i class="fa fa-github fa-lg fa-fw padding-small"></i></a>
+                    </li>
+                    <li>
+                        <a href="https://gitlab.com/xenithorb" title="Gitlab"><i class="fa fa-gitlab fa-lg fa-fw padding-small"></i></a>
+                    </li>
+                </ul></li>
+                <li class="nav-divider"></li>
+                <li>
+        <a href="#" title="Back to top" class="collapsed">
+            <span class="fa fa-arrow-up"></span>
+        </a>
+    </li>
+            </ul>
+        </div>
+        <div id="sidebar-wrapper" class="twitchy-background">
+            <ul id="accordion" class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="../../../../">
+                            <span class="glyphicon glyphicon-home padding-small"></span>
+                            #> opsech.io
+                    </a>
+                </li>
+                    <li class="nav-divider"></li>
+                    <li>
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse-latest">
+                            <span class="glyphicon glyphicon-th-list padding-small"></span>
+                            Recent Articles
+                        </a>
+                    </li>
+                    <li class="panel anti-panel"><ul id="collapse-latest" class="sidebar_submenu collapse in">
+                        <li class="active">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" title="OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars">
+                                <i class="fa fa-file-text padding-small"></i>
+                                OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html" title="How to mount VM disk images on Fedora">
+                                <i class="fa fa-file-text padding-small"></i>
+                                How to mount VM disk images on Fedora
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/06/docker-cleanup-aliases-for-bash.html" title="Docker cleanup aliases for bash">
+                                <i class="fa fa-file-text padding-small"></i>
+                                Docker cleanup aliases for bash
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2017/May/23/docker-dns-with-firewalld-on-fedora.html" title="Docker DNS with FirewallD on Fedora">
+                                <i class="fa fa-file-text padding-small"></i>
+                                Docker DNS with FirewallD on Fedora
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2016/Sep/06/creating-python-3-virtual-environments-on-centos-7.html" title="Creating Python 3 Virtual Environments on Centos 7">
+                                <i class="fa fa-file-text padding-small"></i>
+                                Creating Python 3 Virtual Environments on Centos 7
+                            </a>
+                        </li>
+                    <li>
+                        <a href="../../../../archives.html">
+                            <i class="fa fa-arrow-right padding-small"></i>
+                            More
+                        </a>
+                    </li>
+                    </ul></li>
+                <li class="nav-divider"></li>
+                <li id="share">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-share" title="Share" class="collapsed">
+                        <i class="fa fa-share-alt padding-small"></i>
+                        Share
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-share" class="sidebar_submenu collapse ">
+                    <li>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=../../../../posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" target="popup">
+                            <i class="fa fa-facebook fa-fw fa-lg padding-small"></i>
+                            Facebook
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://plus.google.com/share?url=../../../../posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" target="popup">
+                            <i class="fa fa-google-plus padding-small"></i>
+                            Google+
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/share" class="twitter-share-button" data-count="vertical" target="popup">
+                            <i class="fa fa-twitter fa-fw fa-lg padding-small"></i>
+                            Twitter
+                        </a>
+                    </li>
+                </ul></li>
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-social">
+                        <i class="fa fa-users padding-small"></i>
+                        Contact
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-social" class="sidebar_submenu collapse ">
+                    <li>
+                        <a href="mailto:mike=at=opsech.io" title="Email">
+                            <i class="fa fa-envelope fa-fw fa-lg padding-small"></i>
+                            Email
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/xenithorb" title="Github">
+                            <i class="fa fa-github fa-lg fa-fw padding-small"></i>
+                            Github
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://gitlab.com/xenithorb" title="Gitlab">
+                            <i class="fa fa-gitlab fa-lg fa-fw padding-small"></i>
+                            Gitlab
+                        </a>
+                    </li>
+                </ul></li>
+                
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-pages">
+                        <i class="fa fa-folder-open padding-small"></i>
+                        Pages
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-pages" class="sidebar_submenu collapse ">
+                    <li>
+                        <a href="../../../../pages/the-name.html">
+                            <i class="fa fa-file-text padding-small"></i>
+                            The&nbsp;Name
+                        </a>
+                    </li>
+                </ul></li>
+                
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-categories">
+                        <i class="fa fa-folder-open padding-small"></i>
+                        Categories
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-categories" class="sidebar_submenu collapse ">
+                    <li >
+                        <a href="../../../../category/aws.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            aws
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/docker.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            docker
+                            <span class="badge pull-right categorybadge">2</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="../../../../category/fixes.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            fixes
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/linux.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            linux
+                            <span class="badge pull-right categorybadge">6</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/openwrt.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            openwrt
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/quick-tips.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            quick-tips
+                            <span class="badge pull-right categorybadge">3</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/scripts.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            scripts
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                </ul></li>
+                
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-tags">
+                        <i class="fa fa-tags padding-small"></i>
+                        Tags
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-tags" class="sidebar_submenu collapse ">
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/vizio.html">
+                            vizio
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2b50>]">
+                        <a href="../../../../tag/centos.html">
+                            centos
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>]">
+                        <a href="../../../../tag/virt.html">
+                            virt
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9b8890>]">
+                        <a href="../../../../tag/pulseaudio.html">
+                            pulseaudio
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9419d0>, <pelican.contents.Article object at 0x7fc06fe9cb90>]">
+                        <a href="../../../../tag/quick-tips.html">
+                            quick-tips
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>, <pelican.contents.Article object at 0x7fc06f94d610>, <pelican.contents.Article object at 0x7fc06f95a650>, <pelican.contents.Article object at 0x7fc06f99fe90>, <pelican.contents.Article object at 0x7fc06fc44590>, <pelican.contents.Article object at 0x7fc06f9419d0>, <pelican.contents.Article object at 0x7fc06fe9cb90>, <pelican.contents.Article object at 0x7fc06f9b8890>, <pelican.contents.Article object at 0x7fc06f9e1c50>, <pelican.contents.Article object at 0x7fc06f9b86d0>]">
+                        <a href="../../../../tag/linux.html">
+                            linux
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>]">
+                        <a href="../../../../tag/qemu.html">
+                            qemu
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1110>]">
+                        <a href="../../../../tag/openwrt.html">
+                            openwrt
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2b50>, <pelican.contents.Article object at 0x7fc06fe9cb90>]">
+                        <a href="../../../../tag/systemd.html">
+                            systemd
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06fc44590>]">
+                        <a href="../../../../tag/samba.html">
+                            samba
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef51fd0>]">
+                        <a href="../../../../tag/java.html">
+                            java
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>, <pelican.contents.Article object at 0x7fc06f95a650>, <pelican.contents.Article object at 0x7fc06f9419d0>, <pelican.contents.Article object at 0x7fc06fe9cb90>, <pelican.contents.Article object at 0x7fc06f9b8890>, <pelican.contents.Article object at 0x7fc06f9b86d0>]">
+                        <a href="../../../../tag/fedora.html">
+                            fedora
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f98a8d0>]">
+                        <a href="../../../../tag/s3.html">
+                            s3
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f99fe90>]">
+                        <a href="../../../../tag/centos7.html">
+                            centos7
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f94d610>, <pelican.contents.Article object at 0x7fc06f9d2a50>]">
+                        <a href="../../../../tag/bash.html">
+                            bash
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f95a650>, <pelican.contents.Article object at 0x7fc06f9419d0>]">
+                        <a href="../../../../tag/dns.html">
+                            dns
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06fc44590>]">
+                        <a href="../../../../tag/kde.html">
+                            kde
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2a50>]">
+                        <a href="../../../../tag/tips.html">
+                            tips
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f94d610>]">
+                        <a href="../../../../tag/containers.html">
+                            containers
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f99fe90>]">
+                        <a href="../../../../tag/python.html">
+                            python
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef51fd0>]">
+                        <a href="../../../../tag/ipmi.html">
+                            ipmi
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f98a8d0>]">
+                        <a href="../../../../tag/aws.html">
+                            aws
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f98a8d0>]">
+                        <a href="../../../../tag/cloudfront.html">
+                            cloudfront
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9b86d0>]">
+                        <a href="../../../../tag/dnf.html">
+                            dnf
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/xorg.html">
+                            xorg
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/x11.html">
+                            X11
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06fc44590>]">
+                        <a href="../../../../tag/filesharing.html">
+                            filesharing
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f99fe90>]">
+                        <a href="../../../../tag/python3.html">
+                            python3
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/nouveau.html">
+                            nouveau
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef51fd0>]">
+                        <a href="../../../../tag/openjdk.html">
+                            openjdk
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1110>]">
+                        <a href="../../../../tag/wifi.html">
+                            wifi
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f95a650>]">
+                        <a href="../../../../tag/firewalld.html">
+                            firewalld
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2b50>]">
+                        <a href="../../../../tag/nfs.html">
+                            nfs
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/nvidia.html">
+                            nvidia
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f95a650>]">
+                        <a href="../../../../tag/networkmanager.html">
+                            NetworkManager
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f94d610>, <pelican.contents.Article object at 0x7fc06f95a650>]">
+                        <a href="../../../../tag/docker.html">
+                            docker
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1110>]">
+                        <a href="../../../../tag/scripting.html">
+                            scripting
+                        </a>
+                    </li>
+                </ul></li>
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+        <!-- open/close sidebar -->
+        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">
+            <span id="right-arrow" class="glyphicon glyphicon-chevron-right"  title="expand sidebar"></span>
+            <span id="left-arrow" class="glyphicon glyphicon-chevron-left" title="minimize sidebar"></span>
+        </a>
+       <!-- /open/close sidebar -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+<section id="content">
+    <article>
+        <div class="row">
+            <div class="col-lg-9">
+                <header class="page-header">
+                    <h1>
+                        <a href="../../../../posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html"
+                           rel="bookmark"
+                           title="Permalink to OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars">
+                            OpenJDK April 2017 security update 131 (8u131) and <span class="caps">MD5</span> signed&nbsp;jars
+                        </a>
+                        <small>
+<div class="post-info">
+    <div class="publish-info-block">
+        <small>
+            <span class="published">
+                <i class="fa fa-calendar padding-small"></i><time datetime="2017-06-09T09:59:07-04:00"> Fri 09 June 2017</time>
+            </span>
+            <span class="category">
+                <i class="fa fa-folder-open padding-small"></i><a href="../../../../category/fixes.html">fixes</a>
+            </span>
+            <span class="tags">
+                <i class="fa fa-tags padding-small"></i>
+                <a href="../../../../tag/java.html">java</a> /                 <a href="../../../../tag/openjdk.html">openjdk</a> /                 <a href="../../../../tag/ipmi.html">ipmi</a>            </span>
+        </small>
+    </div>
+</div><!-- /.post-info -->                        </small>
+                    </h1>
+                </header>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="entry-content">
+                    <div class="highlight"><pre><span></span>10:00:58 up 101 days, 14:17,  1 user,  load average: 1.47, 1.07, 0.99
+</pre></div>
+
+
+<p>It&#8217;s been a few months since I last rebooted my home <span class="caps">NAS</span>, and I wanted to do something in the <span class="caps">UEFI</span> that required a full reboot and virtual console. The usual procedure for this is to login to the <span class="caps">BMC</span>&#8217;s website and download a <code>jviewer.jnlp</code> that is in turn run by <code>javaws.itweb</code> (on Fedora/<span class="caps">RHEL</span>, <code>javaws</code> to everyone else), then off I go doing admin&nbsp;things&#8230;</p>
+<p>Unbeknownst to me, the latest <a href="http://www.oracle.com/technetwork/java/javase/8u131-relnotes-3565278.html">April patches that correspond to
+Java™ <span class="caps">SE</span> Development Kit 8, Update 131 (<span class="caps">JDK</span> 8u131)</a> disabled the <span class="caps">MD5</span> algorithm for jar&nbsp;signatures.</p>
+<p>The changelog above reads as&nbsp;follows:</p>
+<blockquote>
+<p><code>security-libs/java.security</code></p>
+<p><strong><span class="caps">MD5</span> added to jdk.jar.disabledAlgorithms Security&nbsp;property</strong></p>
+<p>This <span class="caps">JDK</span> release introduces a new restriction on how <span class="caps">MD5</span> signed <span class="caps">JAR</span> files are verified. If the signed <span class="caps">JAR</span> file uses <span class="caps">MD5</span>, signature verification operations will ignore the signature and treat the <span class="caps">JAR</span> as if it were unsigned. This can potentially occur in the following types of applications that use signed <span class="caps">JAR</span>&nbsp;files:</p>
+<ul>
+<li>Applets or Web Start&nbsp;Applications</li>
+<li>Standalone or Server Applications that are run with a SecurityManager enabled and are configured with a policy file that grants permissions based on the code signer(s) of the <span class="caps">JAR</span>&nbsp;file.</li>
+</ul>
+<p>The list of disabled algorithms is controlled via the security property, <code>jdk.jar.disabledAlgorithms</code>, in the <code>java.security</code> file. This property contains a list of disabled algorithms and key sizes for cryptographically signed <span class="caps">JAR</span>&nbsp;files.</p>
+</blockquote>
+<p>The initial error message was not self-evident at first. As OpenJDK, at least on Fedora 25 where I am currently using it, only exposed the following&nbsp;error:</p>
+<div class="highlight"><pre><span></span>netx: Initialization Error: Could not initialize application. (Fatal: Application Error: Cannot grant permissions to unsigned jars. Application requested security permissions, but jars are not signed.)
+</pre></div>
+
+
+<p>That&#8217;s all fine and dandy, but what am I supposed to do about a <span class="caps">BMC</span> that is out of support? Obviously it&#8217;s unrealistic to expect an out of support board to get a firmware update to ever really address this&nbsp;issue.</p>
+<p>The error never hints toward the fact that it <em>was</em> in fact signed, but said signature was being ignored as <em>unsigned</em> due to the new security settings above. (Note: I think it&#8217;s a terrible idea to abstract something like this as &#8220;unsigned&#8221;, when it should tell you exactly what is&nbsp;wrong.)</p>
+<p>I went on tweaking security settings and profiles for the next few hours bewildered at why this was working the last time I needed to use it, but suddenly not now. Usually with these things the right security settings, or adding an exception with a little rain dance and vile of sysadmin tears gets it working again, but not this time (It didn&#8217;t yet occur to me to check the java changelog.) So the next thing I did was test it with Oracle&#8217;s Java <span class="caps">SE</span>, and that&#8217;s when I found the <em>actual</em>&nbsp;error:</p>
+<div class="highlight"><pre><span></span>Error: Unsigned application requesting unrestricted access to system
+       The following resource is signed with a weak algorithm MD5withRSA and is treated as unsigned:
+</pre></div>
+
+
+<p>(likely because I was testing now in a windows <span class="caps">VM</span> to see if I could get it to work and the jar for this is a separate&nbsp;win32.jar)</p>
+<p>This gave me my first real clue, as searching the web for &#8220;Cannot grant permissions to unsigned jars.&#8221; yields a lot of angry people complaining about <span class="caps">IPMI</span>/<span class="caps">KVM</span> viewers not working (SuperMicro, ASRock Rack, Dell iDRAC, etc), but not a single solution other than &#8220;Use an older version of java&#8221; - no one in this search set seemed to figure out the <code>jdk.jar.disabledAlgorithms</code> property, nor either that the specific breaking change was in <code>8u131</code>.</p>
+<p>Moving on, a searching of the new error message finally yielded <a href="https://wuzhaojun.wordpress.com/2017/05/05/a-workaround-to-fix-unsigned-jnlp-issue-after-upgrade-java-to-version-8-update-131/">this blog</a> and led me to the answer of how to get my <span class="caps">KVM</span> viewer working&nbsp;again.</p>
+<h3 id="solution"><a class="toclink" href="#solution">Solution</a></h3>
+<p>In order to get this working agian, the file <code>/usr/lib/jvm/java-&lt;version&gt;-openjdk-&lt;version&gt;.&lt;nevra&gt;/jre/lib/security/java.security</code> (&#8220;java.security&#8221;) must be edited to completely comment out or tailor the <code>jdk.jar.disabledAlgorithms</code> setting to your&nbsp;needs.</p>
+<p>You can acquire more information about your <code>jnlp</code> by finding the <code>icedtea-web</code> cache and running <code>jarsigner -verify --verbose file.jar</code> (in my case it was under <code>~/.cache/icedtea-web/cache</code>). This shows the following&nbsp;info:</p>
+<div class="highlight"><pre><span></span>- Signed by &quot;CN=ASROCK Incorporation, OU=Digital ID Class 3 - Microsoft Software Validation v2, O=ASROCK Incorporation, L=Taipei, ST=TAIWAN, C=TW&quot;
+    Digest algorithm: SHA1
+    Signature algorithm: MD5withRSA (weak), 2048-bit key
+
+WARNING: The jar will be treated as unsigned, because it is signed with a weak algorithm that is now disabled by the security property:
+
+  jdk.jar.disabledAlgorithms=MD2, MD5, RSA keySize &lt; 1024
+</pre></div>
+
+
+<p>Now you know you need to remove <code>MD5</code> from the list of banned&nbsp;algorithms:</p>
+<div class="highlight"><pre><span></span><span class="gd">--- /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.131-3.b12.fc25.x86_64/jre/lib/security/java.security.orig  2017-06-09 09:17:33.179272834 -0400</span>
+<span class="gi">+++ /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.131-3.b12.fc25.x86_64/jre/lib/security/java.security  2017-06-09 09:48:22.086346183 -0400</span>
+<span class="gu">@@ -557,7 +557,7 @@</span>
+ # implementation. It is not guaranteed to be examined and used by other
+ # implementations.
+ #
+<span class="gd">-jdk.jar.disabledAlgorithms=MD2, MD5, RSA keySize &lt; 1024</span>
+<span class="gi">+jdk.jar.disabledAlgorithms=MD2, RSA keySize &lt; 1024</span>
+
+ # Algorithm restrictions for Secure Socket Layer/Transport Layer Security
+ # (SSL/TLS) processing
+</pre></div>
+
+
+<p>Yes, as suggested by the changelog entry this is less than ideal, but I&#8217;ve accepted it as a calculated risk, given that I <em>only</em> use java for this one specific&nbsp;application.</p>
+<p>Since this location is bound to change often, the following command will aid in editing that&nbsp;file:</p>
+<div class="highlight"><pre><span></span>sudo find /usr/lib/jvm -type f -name <span class="s1">&#39;java.security&#39;</span> -exec sed -i <span class="s1">&#39;/jdk.jar.disabledAlgo/s/ MD5,//&#39;</span> <span class="s1">&#39;{}&#39;</span> <span class="se">\;</span>
+</pre></div>
+                </div>
+                <footer class="text-right">
+                    <p>- Mike</p>
+                </footer>
+            </div>
+        </div>
+    </article>
+</section>
+<footer>
+    <hr>
+    <div class="row">
+        <div class="col-lg-9 text-center">
+            <p><small>
+                Built by <a href="http://docs.getpelican.com/en/latest">Pelican</a> / <a href="https://github.com/ingwinlu/pelican-twitchy">pelican-twitchy</a>
+                &middot;                      <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution 4.0 International License</a>, except where indicated otherwise.
+
+            </small></p>
+        </div>
+    </div>
+</footer>            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+    </div>
+    <!-- /#wrapper -->
+    <!-- jQuery Version 1.11.2 -->
+    <script src="../../../../theme/js/jquery-1.11.2.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../../../../theme/js/bootstrap.min.js"></script>
+    <!-- twitchy Script -->
+    <script src="../../../../theme/js/pelican_twitchy.min.js"></script>
+
+</body>
+</html>

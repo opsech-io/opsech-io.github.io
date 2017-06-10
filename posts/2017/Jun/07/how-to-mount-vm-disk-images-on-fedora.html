@@ -1,0 +1,815 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="author" content="Mike" />
+        <meta name="keywords" content="linux,fedora,qemu,virt" />
+        <meta name="description" content="There are two ways to currently mount disk images on Linux. Both of them involve using QEMU in different aspects. Both of them support the image formats that are supported by QEMU itself …" />
+
+
+    <title>How to mount VM disk images on Fedora - #> opsech.io</title>
+
+        <link rel="stylesheet" href="../../../../theme/css/bootstrap.slate.min.css" type="text/css"/>
+
+    <link href="../../../../theme/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="../../../../theme/css/pygments/monokai.css" rel="stylesheet" />
+    
+        <link href="../../../../theme/css/typogrify.css" rel="stylesheet" />
+    <link href="../../../../theme/css/pelican-twitchy.min.css" rel="stylesheet" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <!-- Feeds -->
+        <link href="../../../../extra/custom.css" rel="stylesheet" />
+
+<link rel="apple-touch-icon" sizes="57x57" href="/favs/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/favs/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/favs/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/favs/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/favs/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/favs/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/favs/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/favs/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/favs/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="/favs/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favs/favicon-194x194.png" sizes="194x194">
+<link rel="icon" type="image/png" href="/favs/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/favs/android-chrome-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="/favs/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="/favs/manifest.json">
+<link rel="mask-icon" href="/favs/safari-pinned-tab.svg" color="#1c1e22">
+<link rel="shortcut icon" href="/favs/favicon.ico">
+<meta name="apple-mobile-web-app-title" content="opsech.io">
+<meta name="application-name" content="opsech.io">
+<meta name="msapplication-TileColor" content="#1c1e22">
+<meta name="msapplication-TileImage" content="/favs/mstile-144x144.png">
+<meta name="msapplication-config" content="/favs/browserconfig.xml">
+<meta name="theme-color" content="#1c1e22"></head>
+<body data-spy="scroll" data-target="#scrollspy">
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper-small" class="twitchy-background">
+            <ul id="accordion-small" class="sidebar-nav sidebar-nav-small">
+                <li>
+        <a href="../../../.." title="#> opsech.io" class="collapsed">
+            <span class="glyphicon glyphicon-home"></span>
+        </a>
+    </li>
+                <li class="nav-divider"></li>
+                <li>
+        <a href="../../../../archives.html" title="Recent Articles" class="collapsed">
+            <span class="glyphicon glyphicon-th-list"></span>
+        </a>
+    </li>
+                
+                <li class="nav-divider"></li>
+                <li id="share-small">
+                    <a data-toggle="collapse" data-parent="#accordion-small" href="#collapse-share-small" title="Share" class="collapsed">
+                        <i class="fa fa-share-alt padding-small"></i>
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-share-small" class="collapse ">
+                    <li>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=../../../../posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html" title="Share via Facebook" target="popup">
+                            <i class="fa fa-facebook fa-fw fa-lg padding-small"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://plus.google.com/share?url=../../../../posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html" title="Share via Google+" target="popup">
+                            <i class="fa fa-google-plus padding-small"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/share" class="twitter-share-button" data-count="vertical" title="Share via Twitter" target="popup">
+                            <i class="fa fa-twitter fa-fw fa-lg padding-small"></i>
+                        </a>
+                    </li>
+                </ul></li>
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion-small" href="#collapse-social-small" title="Social" class="collapsed">
+                        <i class="fa fa-users padding-small"></i>
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-social-small" class="collapse ">
+                    <li>
+                        <a href="mailto:mike=at=opsech.io" title="Email"><i class="fa fa-envelope fa-fw fa-lg padding-small"></i></a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/xenithorb" title="Github"><i class="fa fa-github fa-lg fa-fw padding-small"></i></a>
+                    </li>
+                    <li>
+                        <a href="https://gitlab.com/xenithorb" title="Gitlab"><i class="fa fa-gitlab fa-lg fa-fw padding-small"></i></a>
+                    </li>
+                </ul></li>
+                <li class="nav-divider"></li>
+                <li>
+        <a href="#" title="Back to top" class="collapsed">
+            <span class="fa fa-arrow-up"></span>
+        </a>
+    </li>
+            </ul>
+        </div>
+        <div id="sidebar-wrapper" class="twitchy-background">
+            <ul id="accordion" class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="../../../../">
+                            <span class="glyphicon glyphicon-home padding-small"></span>
+                            #> opsech.io
+                    </a>
+                </li>
+                    <li class="nav-divider"></li>
+                    <li>
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse-latest">
+                            <span class="glyphicon glyphicon-th-list padding-small"></span>
+                            Recent Articles
+                        </a>
+                    </li>
+                    <li class="panel anti-panel"><ul id="collapse-latest" class="sidebar_submenu collapse in">
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" title="OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars">
+                                <i class="fa fa-file-text padding-small"></i>
+                                OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars
+                            </a>
+                        </li>
+                        <li class="active">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html" title="How to mount VM disk images on Fedora">
+                                <i class="fa fa-file-text padding-small"></i>
+                                How to mount VM disk images on Fedora
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/06/docker-cleanup-aliases-for-bash.html" title="Docker cleanup aliases for bash">
+                                <i class="fa fa-file-text padding-small"></i>
+                                Docker cleanup aliases for bash
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2017/May/23/docker-dns-with-firewalld-on-fedora.html" title="Docker DNS with FirewallD on Fedora">
+                                <i class="fa fa-file-text padding-small"></i>
+                                Docker DNS with FirewallD on Fedora
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="hide-overflow" href="../../../../posts/2016/Sep/06/creating-python-3-virtual-environments-on-centos-7.html" title="Creating Python 3 Virtual Environments on Centos 7">
+                                <i class="fa fa-file-text padding-small"></i>
+                                Creating Python 3 Virtual Environments on Centos 7
+                            </a>
+                        </li>
+                    <li>
+                        <a href="../../../../archives.html">
+                            <i class="fa fa-arrow-right padding-small"></i>
+                            More
+                        </a>
+                    </li>
+                    </ul></li>
+                <li class="nav-divider"></li>
+                <li id="share">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-share" title="Share" class="collapsed">
+                        <i class="fa fa-share-alt padding-small"></i>
+                        Share
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-share" class="sidebar_submenu collapse ">
+                    <li>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=../../../../posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html" target="popup">
+                            <i class="fa fa-facebook fa-fw fa-lg padding-small"></i>
+                            Facebook
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://plus.google.com/share?url=../../../../posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html" target="popup">
+                            <i class="fa fa-google-plus padding-small"></i>
+                            Google+
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/share" class="twitter-share-button" data-count="vertical" target="popup">
+                            <i class="fa fa-twitter fa-fw fa-lg padding-small"></i>
+                            Twitter
+                        </a>
+                    </li>
+                </ul></li>
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-social">
+                        <i class="fa fa-users padding-small"></i>
+                        Contact
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-social" class="sidebar_submenu collapse ">
+                    <li>
+                        <a href="mailto:mike=at=opsech.io" title="Email">
+                            <i class="fa fa-envelope fa-fw fa-lg padding-small"></i>
+                            Email
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/xenithorb" title="Github">
+                            <i class="fa fa-github fa-lg fa-fw padding-small"></i>
+                            Github
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://gitlab.com/xenithorb" title="Gitlab">
+                            <i class="fa fa-gitlab fa-lg fa-fw padding-small"></i>
+                            Gitlab
+                        </a>
+                    </li>
+                </ul></li>
+                
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-pages">
+                        <i class="fa fa-folder-open padding-small"></i>
+                        Pages
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-pages" class="sidebar_submenu collapse ">
+                    <li>
+                        <a href="../../../../pages/the-name.html">
+                            <i class="fa fa-file-text padding-small"></i>
+                            The&nbsp;Name
+                        </a>
+                    </li>
+                </ul></li>
+                
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-categories">
+                        <i class="fa fa-folder-open padding-small"></i>
+                        Categories
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-categories" class="sidebar_submenu collapse ">
+                    <li >
+                        <a href="../../../../category/aws.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            aws
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/docker.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            docker
+                            <span class="badge pull-right categorybadge">2</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/fixes.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            fixes
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="../../../../category/linux.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            linux
+                            <span class="badge pull-right categorybadge">6</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/openwrt.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            openwrt
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/quick-tips.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            quick-tips
+                            <span class="badge pull-right categorybadge">3</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="../../../../category/scripts.html">
+                            <i class="fa fa-folder-open padding-small"></i>
+                            scripts
+                            <span class="badge pull-right categorybadge">1</span>
+                        </a>
+                    </li>
+                </ul></li>
+                
+                <li class="nav-divider"></li>
+                <li>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse-tags">
+                        <i class="fa fa-tags padding-small"></i>
+                        Tags
+                    </a>
+                </li>
+                <li class="panel anti-panel"><ul id="collapse-tags" class="sidebar_submenu collapse ">
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/vizio.html">
+                            vizio
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2b50>]">
+                        <a href="../../../../tag/centos.html">
+                            centos
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>]">
+                        <a href="../../../../tag/virt.html">
+                            virt
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9b8890>]">
+                        <a href="../../../../tag/pulseaudio.html">
+                            pulseaudio
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9419d0>, <pelican.contents.Article object at 0x7fc06fe9cb90>]">
+                        <a href="../../../../tag/quick-tips.html">
+                            quick-tips
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>, <pelican.contents.Article object at 0x7fc06f94d610>, <pelican.contents.Article object at 0x7fc06f95a650>, <pelican.contents.Article object at 0x7fc06f99fe90>, <pelican.contents.Article object at 0x7fc06fc44590>, <pelican.contents.Article object at 0x7fc06f9419d0>, <pelican.contents.Article object at 0x7fc06fe9cb90>, <pelican.contents.Article object at 0x7fc06f9b8890>, <pelican.contents.Article object at 0x7fc06f9e1c50>, <pelican.contents.Article object at 0x7fc06f9b86d0>]">
+                        <a href="../../../../tag/linux.html">
+                            linux
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>]">
+                        <a href="../../../../tag/qemu.html">
+                            qemu
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1110>]">
+                        <a href="../../../../tag/openwrt.html">
+                            openwrt
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2b50>, <pelican.contents.Article object at 0x7fc06fe9cb90>]">
+                        <a href="../../../../tag/systemd.html">
+                            systemd
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06fc44590>]">
+                        <a href="../../../../tag/samba.html">
+                            samba
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef51fd0>]">
+                        <a href="../../../../tag/java.html">
+                            java
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef4add0>, <pelican.contents.Article object at 0x7fc06f95a650>, <pelican.contents.Article object at 0x7fc06f9419d0>, <pelican.contents.Article object at 0x7fc06fe9cb90>, <pelican.contents.Article object at 0x7fc06f9b8890>, <pelican.contents.Article object at 0x7fc06f9b86d0>]">
+                        <a href="../../../../tag/fedora.html">
+                            fedora
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f98a8d0>]">
+                        <a href="../../../../tag/s3.html">
+                            s3
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f99fe90>]">
+                        <a href="../../../../tag/centos7.html">
+                            centos7
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f94d610>, <pelican.contents.Article object at 0x7fc06f9d2a50>]">
+                        <a href="../../../../tag/bash.html">
+                            bash
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f95a650>, <pelican.contents.Article object at 0x7fc06f9419d0>]">
+                        <a href="../../../../tag/dns.html">
+                            dns
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06fc44590>]">
+                        <a href="../../../../tag/kde.html">
+                            kde
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2a50>]">
+                        <a href="../../../../tag/tips.html">
+                            tips
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f94d610>]">
+                        <a href="../../../../tag/containers.html">
+                            containers
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f99fe90>]">
+                        <a href="../../../../tag/python.html">
+                            python
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef51fd0>]">
+                        <a href="../../../../tag/ipmi.html">
+                            ipmi
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f98a8d0>]">
+                        <a href="../../../../tag/aws.html">
+                            aws
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f98a8d0>]">
+                        <a href="../../../../tag/cloudfront.html">
+                            cloudfront
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9b86d0>]">
+                        <a href="../../../../tag/dnf.html">
+                            dnf
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/xorg.html">
+                            xorg
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/x11.html">
+                            X11
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06fc44590>]">
+                        <a href="../../../../tag/filesharing.html">
+                            filesharing
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f99fe90>]">
+                        <a href="../../../../tag/python3.html">
+                            python3
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/nouveau.html">
+                            nouveau
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06ef51fd0>]">
+                        <a href="../../../../tag/openjdk.html">
+                            openjdk
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1110>]">
+                        <a href="../../../../tag/wifi.html">
+                            wifi
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f95a650>]">
+                        <a href="../../../../tag/firewalld.html">
+                            firewalld
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9d2b50>]">
+                        <a href="../../../../tag/nfs.html">
+                            nfs
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1c50>]">
+                        <a href="../../../../tag/nvidia.html">
+                            nvidia
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f95a650>]">
+                        <a href="../../../../tag/networkmanager.html">
+                            NetworkManager
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f94d610>, <pelican.contents.Article object at 0x7fc06f95a650>]">
+                        <a href="../../../../tag/docker.html">
+                            docker
+                        </a>
+                    </li>
+                    <li class="tag-[<pelican.contents.Article object at 0x7fc06f9e1110>]">
+                        <a href="../../../../tag/scripting.html">
+                            scripting
+                        </a>
+                    </li>
+                </ul></li>
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+        <!-- open/close sidebar -->
+        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">
+            <span id="right-arrow" class="glyphicon glyphicon-chevron-right"  title="expand sidebar"></span>
+            <span id="left-arrow" class="glyphicon glyphicon-chevron-left" title="minimize sidebar"></span>
+        </a>
+       <!-- /open/close sidebar -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+<section id="content">
+    <article>
+        <div class="row">
+            <div class="col-lg-9">
+                <header class="page-header">
+                    <h1>
+                        <a href="../../../../posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html"
+                           rel="bookmark"
+                           title="Permalink to How to mount VM disk images on Fedora">
+                            How to mount <span class="caps">VM</span> disk images on&nbsp;Fedora
+                        </a>
+                        <small>
+<div class="post-info">
+    <div class="publish-info-block">
+        <small>
+            <span class="published">
+                <i class="fa fa-calendar padding-small"></i><time datetime="2017-06-07T19:18:00-04:00"> Wed 07 June 2017</time>
+            </span>
+            <span class="category">
+                <i class="fa fa-folder-open padding-small"></i><a href="../../../../category/linux.html">linux</a>
+            </span>
+            <span class="tags">
+                <i class="fa fa-tags padding-small"></i>
+                <a href="../../../../tag/linux.html">linux</a> /                 <a href="../../../../tag/fedora.html">fedora</a> /                 <a href="../../../../tag/qemu.html">qemu</a> /                 <a href="../../../../tag/virt.html">virt</a>            </span>
+        </small>
+    </div>
+</div><!-- /.post-info -->                        </small>
+                    </h1>
+                </header>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="entry-content">
+                    <div class="toc">
+<ul>
+<li><a href="#why">Why?</a></li>
+<li><a href="#notes">Notes</a></li>
+<li><a href="#easiest-method-using-libguestfs-tools">Easiest method using&nbsp;libguestfs-tools</a></li>
+<li><a href="#harder-method-using-qemu-nbd">Harder method using&nbsp;qemu-nbd</a></li>
+<li><a href="#caveats">Caveats</a><ul>
+<li><a href="#using-ntfsfix-with-option-1">Using ntfsfix with option&nbsp;1:</a></li>
+<li><a href="#using-ntfsfix-with-option-2">Using ntfsfix with option&nbsp;2:</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<hr />
+<p>There are two ways to currently mount disk images on Linux. Both of them involve using <span class="caps">QEMU</span> in different aspects. Both of them support the image formats that are supported by <span class="caps">QEMU</span> itself. I won&#8217;t enumerate that list, but for practical sake, it&#8217;s whatever images you&#8217;re used to working with when using hypervisors like VirtualBox, Hyper-V, <span class="caps">KVM</span>, et&nbsp;al.</p>
+<h3 id="why"><a class="toclink" href="#why">Why?</a></h3>
+<p>Perhaps you&#8217;re in a situation where you need to mount an image to extract something from it, but you can&#8217;t or don&#8217;t want to mess around with network shares like <span class="caps">NFS</span> or Samba, and you need a way to transfer data to and from the virtual&nbsp;machine.</p>
+<p>Perhaps you have a failing hard drive that is dubious at best with transferring large amounts of data at once. You could attempt to use <code>rsync -P</code> and chip away at transferring the image, in hopes that it runs and has your data intact on the destination, or you could mount it as described below and target the important data&nbsp;immediately.</p>
+<h3 id="notes"><a class="toclink" href="#notes">Notes</a></h3>
+<p>If <code>libguestfs-tools</code> are available on your operating system, I would suggest going with this method as it was specifically intended to be used for the aforementioned task. The latter method is more of a hack taking advantage of the <span class="caps">NBD</span>&nbsp;protocol.</p>
+<p>Both methods involve what amounts to starting an on-the-fly virtual machine (via qemu) to read the image and export the data. Verify with <code>ps aux | grep qemu</code> in the midst of one of the following methods if you&#8217;re&nbsp;curious.</p>
+<p>The following method (#1) also has the ability to attach to a live system. This could be useful if you just want to transfer something simple that you <em>know will not intersect with anything on the running system</em>. This implies a strict warning. I mean it, the <a href="https://linux.die.net/man/3/guestfs">man page</a> (ctrl+f &#8220;<span class="caps">ATTACH</span>&#8221;) literally&nbsp;says:</p>
+<blockquote>
+<p>Note (1): This is highly experimental and has a tendency to eat babies. Use with&nbsp;caution.</p>
+</blockquote>
+<p>See: <code>--live</code> at the <a href="https://linux.die.net/man/1/guestmount">guestmount man page</a> for more&nbsp;information.</p>
+<h3 id="easiest-method-using-libguestfs-tools"><a class="toclink" href="#easiest-method-using-libguestfs-tools">Easiest method using&nbsp;libguestfs-tools</a></h3>
+<ol>
+<li>
+<p>Install <code>libguestfs-tools</code>:</p>
+<div class="highlight"><pre><span></span>$ sudo dnf install libguestfs-tools
+</pre></div>
+
+
+</li>
+<li>
+<p>Being that we now have <code>libguestfs-tools</code>, we have the <code>virt-*</code> suite at our disposal. Let&#8217;s take a look at what partitions are available to mount on a test <code>qcow2</code> image.</p>
+<div class="highlight"><pre><span></span>$ sudo -i
+# cd /var/lib/libvirt/images
+# virt-filesystems -a fedora25.qcow2
+/dev/sda1
+btrfsvol:/dev/sda3/root
+btrfsvol:/dev/sda3/home
+/dev/sda3
+</pre></div>
+
+
+</li>
+<li>
+<p>We can see here that our mountable options are <code>sda1</code> and <code>sda3</code> - and we&#8217;re probably after <code>sda3</code> since that contains our important data. Let&#8217;s mount it with <code>guestmount</code>:</p>
+<div class="highlight"><pre><span></span># guestmount -r -a fedora25.qcow2 -m /dev/sda3 /mnt/point
+# ls -l /mnt/point
+total 0
+drwxr-xr-x. 1 root root  12 Jun  3 18:12 home
+dr-xr-xr-x. 1 root root 132 Jun  3 19:38 root
+</pre></div>
+
+
+<p>Where <code>-r</code> is to mount the image read-only, <code>-m</code> is the internal partition you want to mount, and <code>/mnt/point</code> is a directory on the host filesystem that you want to mount the internal partition&nbsp;to.</p>
+<p>Here we see <code>home</code> and <code>root</code> directories that contain the <code>btrfs</code> home and root subvolumes. That&#8217;s because we mounted <code>/dev/sda3</code> directly and the default subvolume to mount on a <code>btrfs</code> filesystem is <code>subvol=/</code> aka <code>subvolid=5</code>. If that&#8217;s not relevant or doesn&#8217;t make sense to you, just note that this would ordinarily be the root of the filesystem (i.e. <code>/</code> where <code>home</code>, <code>var</code>, <code>usr</code>, <code>etc</code>, etc live) were it not <code>btrfs</code>.</p>
+</li>
+<li>
+<p>That&#8217;s it! Now, when you&#8217;re done, simply use <code>guestunmount</code> to un-mount the device much in the same way you would use <code>umount</code>:</p>
+<div class="highlight"><pre><span></span># exit
+$ cd # in case we&#39;re in /mnt/point
+$ sudo guestunmount /mnt/point
+</pre></div>
+
+
+</li>
+</ol>
+<h3 id="harder-method-using-qemu-nbd"><a class="toclink" href="#harder-method-using-qemu-nbd">Harder method using <code>qemu-nbd</code></a></h3>
+<ol>
+<li>
+<p>Start off by installing <code>qemu-img</code> and <code>nbd</code> packages:</p>
+<div class="highlight"><pre><span></span>$ sudo dnf install qemu-img nbd
+</pre></div>
+
+
+</li>
+<li>
+<p>Load the <code>nbd</code> kernel module with option <code>max_part=8</code>. This option is basically a required option unless your images are flat and have no internal partitions because we need that in order for it to create <code>nbdNpY</code> devices once <code>nbdN</code> is linked to an&nbsp;image:</p>
+<div class="highlight"><pre><span></span>$ sudo modprobe nbd <span class="nv">max_part</span><span class="o">=</span><span class="m">8</span>
+</pre></div>
+
+
+</li>
+<li>
+<p>Now let&#8217;s attach the virtual image to one of the nbd&nbsp;devices:</p>
+<div class="highlight"><pre><span></span>$ sudo qemu-nbd -c /dev/nbd0 /var/lib/libvirt/images/fedora25.qcow2
+$ # check dmesg for partitions indicating it was loaded properly
+$ dmesg | grep nbd0
+[348950.439938]  nbd0: p1 p2 p3
+</pre></div>
+
+
+<p>Note: Optionally use <code>-r</code> to export the image read-only. Or you can also use <code>mount -o ro</code> in one of the following steps. It&#8217;s probably best to be read-only at the lowest level,&nbsp;however.</p>
+<p>Here we can see <code>p1</code> through <code>p3</code> are active, let&#8217;s explore that further&nbsp;next</p>
+</li>
+<li>
+<p>Optional: check partitions with <code>fdisk</code> or <code>parted</code>:</p>
+<div class="highlight"><pre><span></span>$ sudo fdisk -l /dev/nbd0
+Disk /dev/nbd0: 20 GiB, 21474836480 bytes, 41943040 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0xf4520513
+
+Device      Boot   Start      End  Sectors Size Id Type
+/dev/nbd0p1 *       2048  2099199  2097152   1G 83 Linux
+/dev/nbd0p2      2099200  6293503  4194304   2G 82 Linux swap / Solaris
+/dev/nbd0p3      6293504 41943039 35649536  17G 83 Linux
+
+$  sudo parted /dev/nbd0 print
+Model: Unknown (unknown)
+Disk /dev/nbd0: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+Disk Flags:
+
+Number  Start   End     Size    Type     File system     Flags
+ 1      1049kB  1075MB  1074MB  primary  ext4            boot
+ 2      1075MB  3222MB  2147MB  primary  linux-swap(v1)
+ 3      3222MB  21.5GB  18.3GB  primary  btrfs
+</pre></div>
+
+
+</li>
+<li>
+<p>We will select <code>/dev/nbd0p3</code> as our mount target, this corresponds to <code>/dev/sda3</code> from inside the virtual machine, and is the <code>btrfs</code> filesystem we&#8217;re interested&nbsp;in:</p>
+<div class="highlight"><pre><span></span>$ sudo mount /dev/nbd0p3 /mnt/point
+$ ls -l /mnt/point
+total 0
+drwxr-xr-x. 1 root root  12 Jun  3 18:12 home
+dr-xr-xr-x. 1 root root 132 Jun  3 19:38 root
+</pre></div>
+
+
+<p>Where <code>/mnt/point</code> is any directory on the filesystem you would like to mount&nbsp;on.</p>
+</li>
+<li>
+<p>Success! Now when you&#8217;re done clean up&nbsp;with:</p>
+<div class="highlight"><pre><span></span>$ cd # in case we&#39;re under /mnt/point
+$ sudo umount /mnt/point
+$ sudo qemu-nbd -d /dev/nbd0
+$ sudo modprobe -r nbd
+</pre></div>
+
+
+</li>
+</ol>
+<h3 id="caveats"><a class="toclink" href="#caveats">Caveats</a></h3>
+<ol>
+<li>
+<p><strong>libguestfs: error: invalid value for backingformat parameter &#8216;vdi&#8217;:</strong> Edit: Actually, this is <a href="https://www.redhat.com/archives/libguestfs/2017-June/msg00043.html">a bug that I apparently found and reported on <span class="caps">IRC</span> that was fixed here</a>, thanks to Richard Jones for fixing it! The gist is that it was caused by a stringent whitelist that didn&#8217;t account for all image&nbsp;types.</p>
+<p><s>For reasons unknown to me</s> <code>libguestfs</code><span class="quo">&#8216;</span>s tools sometimes work fine with images other than <code>qcow2</code> and <code>raw</code>, and sometimes not. For example, <code>virt-rescue</code> and <code>guestmount</code> seem to work with most image formats, but <code>virt-filesystems</code> seems to support only the abovementioned two. In case you run up agasint this when intending to use <code>libguestfs-tools</code>, use <code>virt-rescue</code> instead and utilize the rescue shell to enumerate partitions as described during 1. on the next&nbsp;caveat.</p>
+</li>
+<li>
+<p><strong>Read only file system:</strong> You may get to the point after you mount the filesystem, especially with ones like <code>ntfs</code>, where the dirty bit has been set by an unclean shutdown and the surrogate ad-hoc virtual machine that is created by <code>guestmount</code> mounts it read-only under the hood forcefully. This is very hard to notice unless you add <code>-v | --verbose</code> to <code>guestmount</code>, and then you can clearly see what is going on (by contrast with method 2, when you go to manually mount it will be quite evident). Amidst all the other output, you should find toward the&nbsp;end:</p>
+<div class="highlight"><pre><span></span>commandrvf: mount -o  /dev/sda2 /sysroot/
+[    0.982901] fuse init (API version 7.26)
+The disk contains an unclean file system (0, 0).
+Metadata kept in Windows cache, refused to mount.
+Falling back to read-only mount because the NTFS partition is in an
+unsafe state. Please resume and shutdown Windows fully (no hibernation
+or fast restarting.)
+guestfsd: main_loop: proc 74 (mount_options) took 0.13 seconds
+</pre></div>
+
+
+<p>In this case, use the <code>ntfsfix</code> command in order to make the filesystem properly mount. Be aware that this can be potentially dangerous, and the instructions to use windows for this should be heeded. That being said, I haven&#8217;t really had any issues with it&nbsp;myself:</p>
+<h4 id="using-ntfsfix-with-option-1"><a class="toclink" href="#using-ntfsfix-with-option-1">Using <code>ntfsfix</code> with option&nbsp;1:</a></h4>
+<ol>
+<li>
+<p>Manually start the rescue&nbsp;shell:</p>
+<div class="highlight"><pre><span></span>virt-rescue -a Windows.vdi
+...
+...
+&gt;&lt;rescue&gt; lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sdb      8:16   0    4G  0 disk /
+sda      8:0    0   50G  0 disk
+|-sda2   8:2    0 49.5G  0 part
+`-sda1   8:1    0  500M  0 part
+</pre></div>
+
+
+</li>
+<li>
+<p>Use <code>ntfsfix</code> to reset the&nbsp;filesystem:</p>
+<div class="highlight"><pre><span></span>&gt;&lt;rescue&gt; ntfsfix /dev/sda2
+Mounting volume... The disk contains an unclean file system (0, 0).
+Metadata kept in Windows cache, refused to mount.
+FAILED
+Attempting to correct errors...
+Processing $MFT and $MFTMirr...
+Reading $MFT... OK
+Reading $MFTMirr... OK
+Comparing $MFTMirr to $MFT... OK
+Processing of $MFT and $MFTMirr completed successfully.
+Setting required flags on partition... OK
+Going to empty the journal ($LogFile)... OK
+Checking the alternate boot sector... OK
+NTFS volume version is 3.1.
+NTFS partition /dev/sda2 was processed successfully.
+</pre></div>
+
+
+</li>
+</ol>
+<h4 id="using-ntfsfix-with-option-2"><a class="toclink" href="#using-ntfsfix-with-option-2">Using <code>ntfsfix</code> with option&nbsp;2:</a></h4>
+<ol>
+<li>After <code>qemu-nbd -c /dev/nbd0 &lt;image_file&gt;</code> do the following:<div class="highlight"><pre><span></span>$ ntfsfix /dev/nbd0p2
+Mounting volume... The disk contains an unclean file system (0, 0).
+Metadata kept in Windows cache, refused to mount.
+FAILED
+Attempting to correct errors...
+Processing $MFT and $MFTMirr...
+Reading $MFT... OK
+Reading $MFTMirr... OK
+Comparing $MFTMirr to $MFT... OK
+Processing of $MFT and $MFTMirr completed successfully.
+Setting required flags on partition... OK
+Going to empty the journal ($LogFile)... OK
+Checking the alternate boot sector... OK
+NTFS volume version is 3.1.
+NTFS partition /dev/nbd0p2 was processed successfully.
+</pre></div>
+
+
+</li>
+</ol>
+<p>You should then be able to (with both methods) mount the <code>ntfs</code> filesystem read-write and continue&nbsp;on.</p>
+</li>
+</ol>
+                </div>
+                <footer class="text-right">
+                    <p>- Mike</p>
+                </footer>
+            </div>
+        </div>
+    </article>
+</section>
+<footer>
+    <hr>
+    <div class="row">
+        <div class="col-lg-9 text-center">
+            <p><small>
+                Built by <a href="http://docs.getpelican.com/en/latest">Pelican</a> / <a href="https://github.com/ingwinlu/pelican-twitchy">pelican-twitchy</a>
+                &middot;                      <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution 4.0 International License</a>, except where indicated otherwise.
+
+            </small></p>
+        </div>
+    </div>
+</footer>            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+    </div>
+    <!-- /#wrapper -->
+    <!-- jQuery Version 1.11.2 -->
+    <script src="../../../../theme/js/jquery-1.11.2.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../../../../theme/js/bootstrap.min.js"></script>
+    <!-- twitchy Script -->
+    <script src="../../../../theme/js/pelican_twitchy.min.js"></script>
+
+</body>
+</html>

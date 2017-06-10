@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"><channel><title>#&gt; opsech.io - quick-tips</title><link>https://opsech.io/</link><description>Random wanderings of a Linux traveller</description><lastBuildDate>Sun, 14 Feb 2016 06:50:15 -0500</lastBuildDate><item><title>Quick Tip: Enable easy NetworkManager local DNS caching</title><link>https://opsech.io/posts/2016/Feb/14/quick-tip-enable-easy-networkmanager-local-dns-caching.html</link><description>&lt;p&gt;To enable NetworkManager&amp;#8217;s feature to start &lt;code&gt;dnsmasq&lt;/code&gt; and enable dns&amp;nbsp;caching:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Add the following &lt;code&gt;dns=&lt;/code&gt; line to &lt;code&gt;/etc/NetworkManager/NetworkManager.conf&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;[main]&lt;/span&gt;
+&lt;span class="na"&gt;plugins&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;ifcfg-rh,ibft&lt;/span&gt;
+&lt;span class="na"&gt;dns&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;dnsmasq&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Install &lt;code&gt;dnmasq&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo dnf install dnsmasq
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Add some extra space to the default&amp;nbsp;cache:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo sh -c &lt;span class="s1"&gt;&amp;#39;echo &amp;quot;cache-size=1000&amp;quot; &amp;gt;&amp;gt; /etc/NetworkManager …&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;&lt;/ol&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mike</dc:creator><pubDate>Sun, 14 Feb 2016 06:50:15 -0500</pubDate><guid isPermaLink="false">tag:opsech.io,2016-02-14:/posts/2016/Feb/14/quick-tip-enable-easy-networkmanager-local-dns-caching.html</guid><category>fedora</category><category>dns</category><category>linux</category><category>quick-tips</category></item><item><title>Fedora 23 systemd lingering processes after logout fix</title><link>https://opsech.io/posts/2016/Jan/15/fedora-systemd-lingering-process-fix.html</link><description>&lt;p&gt;Small tip to help after logging out of your Xsession to make sure lingering processes are&amp;nbsp;killed&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mike</dc:creator><pubDate>Fri, 15 Jan 2016 12:31:21 -0500</pubDate><guid isPermaLink="false">tag:opsech.io,2016-01-15:/posts/2016/Jan/15/fedora-systemd-lingering-process-fix.html</guid><category>fedora</category><category>linux</category><category>quick-tips</category><category>systemd</category></item><item><title>Searching through $PATH commands with compgen</title><link>https://opsech.io/posts/2015/Nov/02/list-path-with-compgen.html</link><description>&lt;p&gt;Learn how to list your bash $&lt;span class="caps"&gt;PATH&lt;/span&gt; with&amp;nbsp;compgen&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mike</dc:creator><pubDate>Mon, 02 Nov 2015 10:31:27 -0500</pubDate><guid isPermaLink="false">tag:opsech.io,2015-11-02:/posts/2015/Nov/02/list-path-with-compgen.html</guid><category>bash</category><category>tips</category></item></channel></rss>

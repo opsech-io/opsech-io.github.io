@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#&gt; opsech.io - fixes</title><link href="https://opsech.io/" rel="alternate"></link><link href="https://opsech.io/feeds/fixes.atom.xml" rel="self"></link><id>https://opsech.io/</id><updated>2017-06-09T09:59:07-04:00</updated><entry><title>OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars</title><link href="https://opsech.io/posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" rel="alternate"></link><published>2017-06-09T09:59:07-04:00</published><updated>2017-06-09T09:59:07-04:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2017-06-09:/posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html</id><summary type="html">&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;10:00:58 up 101 days, 14:17,  1 user,  load average: 1.47, 1.07, 0.99
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It&amp;#8217;s been a few months since I last rebooted my home &lt;span class="caps"&gt;NAS&lt;/span&gt;, and I wanted to do something in the &lt;span class="caps"&gt;UEFI&lt;/span&gt; that required a full reboot and virtual console. The usual …&lt;/p&gt;</summary><content type="html">&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;10:00:58 up 101 days, 14:17,  1 user,  load average: 1.47, 1.07, 0.99
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It&amp;#8217;s been a few months since I last rebooted my home &lt;span class="caps"&gt;NAS&lt;/span&gt;, and I wanted to do something in the &lt;span class="caps"&gt;UEFI&lt;/span&gt; that required a full reboot and virtual console. The usual procedure for this is to login to the &lt;span class="caps"&gt;BMC&lt;/span&gt;&amp;#8217;s website and download a &lt;code&gt;jviewer.jnlp&lt;/code&gt; that is in turn run by &lt;code&gt;javaws.itweb&lt;/code&gt; (on Fedora/&lt;span class="caps"&gt;RHEL&lt;/span&gt;, &lt;code&gt;javaws&lt;/code&gt; to everyone else), then off I go doing admin&amp;nbsp;things&amp;#8230;&lt;/p&gt;
+&lt;p&gt;Unbeknownst to me, the latest &lt;a href="http://www.oracle.com/technetwork/java/javase/8u131-relnotes-3565278.html"&gt;April patches that correspond to
+Java™ &lt;span class="caps"&gt;SE&lt;/span&gt; Development Kit 8, Update 131 (&lt;span class="caps"&gt;JDK&lt;/span&gt; 8u131)&lt;/a&gt; disabled the &lt;span class="caps"&gt;MD5&lt;/span&gt; algorithm for jar&amp;nbsp;signatures.&lt;/p&gt;
+&lt;p&gt;The changelog above reads as&amp;nbsp;follows:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;security-libs/java.security&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;span class="caps"&gt;MD5&lt;/span&gt; added to jdk.jar.disabledAlgorithms Security&amp;nbsp;property&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;This &lt;span class="caps"&gt;JDK&lt;/span&gt; release introduces a new restriction on how &lt;span class="caps"&gt;MD5&lt;/span&gt; signed &lt;span class="caps"&gt;JAR&lt;/span&gt; files are verified. If the signed &lt;span class="caps"&gt;JAR&lt;/span&gt; file uses &lt;span class="caps"&gt;MD5&lt;/span&gt;, signature verification operations will ignore the signature and treat the &lt;span class="caps"&gt;JAR&lt;/span&gt; as if it were unsigned. This can potentially occur in the following types of applications that use signed &lt;span class="caps"&gt;JAR&lt;/span&gt;&amp;nbsp;files:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Applets or Web Start&amp;nbsp;Applications&lt;/li&gt;
+&lt;li&gt;Standalone or Server Applications that are run with a SecurityManager enabled and are configured with a policy file that grants permissions based on the code signer(s) of the &lt;span class="caps"&gt;JAR&lt;/span&gt;&amp;nbsp;file.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The list of disabled algorithms is controlled via the security property, &lt;code&gt;jdk.jar.disabledAlgorithms&lt;/code&gt;, in the &lt;code&gt;java.security&lt;/code&gt; file. This property contains a list of disabled algorithms and key sizes for cryptographically signed &lt;span class="caps"&gt;JAR&lt;/span&gt;&amp;nbsp;files.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The initial error message was not self-evident at first. As OpenJDK, at least on Fedora 25 where I am currently using it, only exposed the following&amp;nbsp;error:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;netx: Initialization Error: Could not initialize application. (Fatal: Application Error: Cannot grant permissions to unsigned jars. Application requested security permissions, but jars are not signed.)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;That&amp;#8217;s all fine and dandy, but what am I supposed to do about a &lt;span class="caps"&gt;BMC&lt;/span&gt; that is out of support? Obviously it&amp;#8217;s unrealistic to expect an out of support board to get a firmware update to ever really address this&amp;nbsp;issue.&lt;/p&gt;
+&lt;p&gt;The error never hints toward the fact that it &lt;em&gt;was&lt;/em&gt; in fact signed, but said signature was being ignored as &lt;em&gt;unsigned&lt;/em&gt; due to the new security settings above. (Note: I think it&amp;#8217;s a terrible idea to abstract something like this as &amp;#8220;unsigned&amp;#8221;, when it should tell you exactly what is&amp;nbsp;wrong.)&lt;/p&gt;
+&lt;p&gt;I went on tweaking security settings and profiles for the next few hours bewildered at why this was working the last time I needed to use it, but suddenly not now. Usually with these things the right security settings, or adding an exception with a little rain dance and vile of sysadmin tears gets it working again, but not this time (It didn&amp;#8217;t yet occur to me to check the java changelog.) So the next thing I did was test it with Oracle&amp;#8217;s Java &lt;span class="caps"&gt;SE&lt;/span&gt;, and that&amp;#8217;s when I found the &lt;em&gt;actual&lt;/em&gt;&amp;nbsp;error:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Error: Unsigned application requesting unrestricted access to system
+       The following resource is signed with a weak algorithm MD5withRSA and is treated as unsigned:
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;(likely because I was testing now in a windows &lt;span class="caps"&gt;VM&lt;/span&gt; to see if I could get it to work and the jar for this is a separate&amp;nbsp;win32.jar)&lt;/p&gt;
+&lt;p&gt;This gave me my first real clue, as searching the web for &amp;#8220;Cannot grant permissions to unsigned jars.&amp;#8221; yields a lot of angry people complaining about &lt;span class="caps"&gt;IPMI&lt;/span&gt;/&lt;span class="caps"&gt;KVM&lt;/span&gt; viewers not working (SuperMicro, ASRock Rack, Dell iDRAC, etc), but not a single solution other than &amp;#8220;Use an older version of java&amp;#8221; - no one in this search set seemed to figure out the &lt;code&gt;jdk.jar.disabledAlgorithms&lt;/code&gt; property, nor either that the specific breaking change was in &lt;code&gt;8u131&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Moving on, a searching of the new error message finally yielded &lt;a href="https://wuzhaojun.wordpress.com/2017/05/05/a-workaround-to-fix-unsigned-jnlp-issue-after-upgrade-java-to-version-8-update-131/"&gt;this blog&lt;/a&gt; and led me to the answer of how to get my &lt;span class="caps"&gt;KVM&lt;/span&gt; viewer working&amp;nbsp;again.&lt;/p&gt;
+&lt;h3 id="solution"&gt;&lt;a class="toclink" href="#solution"&gt;Solution&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;In order to get this working agian, the file &lt;code&gt;/usr/lib/jvm/java-&amp;lt;version&amp;gt;-openjdk-&amp;lt;version&amp;gt;.&amp;lt;nevra&amp;gt;/jre/lib/security/java.security&lt;/code&gt; (&amp;#8220;java.security&amp;#8221;) must be edited to completely comment out or tailor the &lt;code&gt;jdk.jar.disabledAlgorithms&lt;/code&gt; setting to your&amp;nbsp;needs.&lt;/p&gt;
+&lt;p&gt;You can acquire more information about your &lt;code&gt;jnlp&lt;/code&gt; by finding the &lt;code&gt;icedtea-web&lt;/code&gt; cache and running &lt;code&gt;jarsigner -verify --verbose file.jar&lt;/code&gt; (in my case it was under &lt;code&gt;~/.cache/icedtea-web/cache&lt;/code&gt;). This shows the following&amp;nbsp;info:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;- Signed by &amp;quot;CN=ASROCK Incorporation, OU=Digital ID Class 3 - Microsoft Software Validation v2, O=ASROCK Incorporation, L=Taipei, ST=TAIWAN, C=TW&amp;quot;
+    Digest algorithm: SHA1
+    Signature algorithm: MD5withRSA (weak), 2048-bit key
+
+WARNING: The jar will be treated as unsigned, because it is signed with a weak algorithm that is now disabled by the security property:
+
+  jdk.jar.disabledAlgorithms=MD2, MD5, RSA keySize &amp;lt; 1024
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now you know you need to remove &lt;code&gt;MD5&lt;/code&gt; from the list of banned&amp;nbsp;algorithms:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gd"&gt;--- /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.131-3.b12.fc25.x86_64/jre/lib/security/java.security.orig  2017-06-09 09:17:33.179272834 -0400&lt;/span&gt;
+&lt;span class="gi"&gt;+++ /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.131-3.b12.fc25.x86_64/jre/lib/security/java.security  2017-06-09 09:48:22.086346183 -0400&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -557,7 +557,7 @@&lt;/span&gt;
+ # implementation. It is not guaranteed to be examined and used by other
+ # implementations.
+ #
+&lt;span class="gd"&gt;-jdk.jar.disabledAlgorithms=MD2, MD5, RSA keySize &amp;lt; 1024&lt;/span&gt;
+&lt;span class="gi"&gt;+jdk.jar.disabledAlgorithms=MD2, RSA keySize &amp;lt; 1024&lt;/span&gt;
+
+ # Algorithm restrictions for Secure Socket Layer/Transport Layer Security
+ # (SSL/TLS) processing
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Yes, as suggested by the changelog entry this is less than ideal, but I&amp;#8217;ve accepted it as a calculated risk, given that I &lt;em&gt;only&lt;/em&gt; use java for this one specific&amp;nbsp;application.&lt;/p&gt;
+&lt;p&gt;Since this location is bound to change often, the following command will aid in editing that&amp;nbsp;file:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo find /usr/lib/jvm -type f -name &lt;span class="s1"&gt;&amp;#39;java.security&amp;#39;&lt;/span&gt; -exec sed -i &lt;span class="s1"&gt;&amp;#39;/jdk.jar.disabledAlgo/s/ MD5,//&amp;#39;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;{}&amp;#39;&lt;/span&gt; &lt;span class="se"&gt;\;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="java"></category><category term="openjdk"></category><category term="ipmi"></category></entry></feed>
