@@ -1,5 +1,158 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>#&gt; opsech.io</title><link href="https://opsech.io/" rel="alternate"></link><link href="https://opsech.io/feeds/all.atom.xml" rel="self"></link><id>https://opsech.io/</id><updated>2017-06-09T09:59:07-04:00</updated><entry><title>OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars</title><link href="https://opsech.io/posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" rel="alternate"></link><published>2017-06-09T09:59:07-04:00</published><updated>2017-06-09T09:59:07-04:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2017-06-09:/posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html</id><summary type="html">&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;10:00:58 up 101 days, 14:17,  1 user,  load average: 1.47, 1.07, 0.99
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#&gt; opsech.io</title><link href="https://opsech.io/" rel="alternate"></link><link href="https://opsech.io/feeds/all.atom.xml" rel="self"></link><id>https://opsech.io/</id><updated>2017-06-12T23:43:26-04:00</updated><entry><title>Running Fedora 25 on Google Compute Engine</title><link href="https://opsech.io/posts/2017/Jun/12/running-fedora-on-gce.html" rel="alternate"></link><published>2017-06-12T23:43:26-04:00</published><updated>2017-06-12T23:43:26-04:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2017-06-12:/posts/2017/Jun/12/running-fedora-on-gce.html</id><summary type="html">&lt;p&gt;How to convert, upload and create a Fedora 25 image on Google Compute&amp;nbsp;Engine&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently I had an opportunity to mess around with Google Compute Engine and noticed a distinct lack of presence of my beloved Fedora &lt;span class="caps"&gt;OS&lt;/span&gt;. A quick searching turned up &lt;a href="http://rancher.com/running-fedora-21-on-google-compute-engine/"&gt;this how-to&lt;/a&gt;, that while &lt;span class="caps"&gt;OK&lt;/span&gt;, was slightly outdated (insofar as the options didn&amp;#8217;t work exactly as is). So, I&amp;#8217;ve decided to record the exact steps I took to get a fully-functioning Fedora 25 image on &lt;a href="Google Compute Engine"&gt;&lt;span class="caps"&gt;GCE&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;h4 id="prerequisites"&gt;&lt;a class="toclink" href="#prerequisites"&gt;Prerequisites&lt;/a&gt;&lt;/h4&gt;
+&lt;ol&gt;
+&lt;li&gt;A Google&amp;nbsp;Account&lt;/li&gt;
+&lt;li&gt;A Google Cloud Platform Project-&lt;span class="caps"&gt;ID&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;A Linux machine (preferably local Fedora 25) to install &lt;code&gt;google-cloud-sdk&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Expected programs: &lt;code&gt;sfdisk&lt;/code&gt;, &lt;code&gt;wget&lt;/code&gt;, &lt;code&gt;xz&lt;/code&gt;, &lt;code&gt;python&lt;/code&gt;, &lt;code&gt;ssh&lt;/code&gt;, &lt;code&gt;dnf&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id="instructions"&gt;&lt;a class="toclink" href="#instructions"&gt;Instructions&lt;/a&gt;&lt;/h4&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Image&amp;nbsp;prep:&lt;/p&gt;
+&lt;p&gt;First we need to get the Fedora Cloud &lt;span class="caps"&gt;RAW&lt;/span&gt; image and convert it to be compatible with &lt;span class="caps"&gt;GCE&lt;/span&gt;. Make note of &lt;code&gt;IMAGE_NAME&lt;/code&gt; and &lt;code&gt;BUCKET_NAME&lt;/code&gt;, you may need to change those and we will be using those going forward (If you set it once and use the same shell for everything you&amp;#8217;re&amp;nbsp;fine):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;Fedora-Cloud-Base-25-1.3.x86_64
+&lt;span class="nv"&gt;BUCKET_NAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;my-unique-bucket-name
+
+wget -O - &lt;span class="s2"&gt;&amp;quot;https://download.fedoraproject.org/pub/fedora/linux/releases/25/CloudImages/x86_64/images/&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;.raw.xz&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+    &lt;span class="p"&gt;|&lt;/span&gt; xz -cd - &amp;gt; disk.raw
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now that we have a &lt;code&gt;disk.raw&lt;/code&gt; (what &lt;span class="caps"&gt;GCE&lt;/span&gt; expects inside the &lt;code&gt;.tar.gz&lt;/code&gt;) we also need to temporarily mount it and enable the &lt;code&gt;GCE&lt;/code&gt; cloud-init datasource. &lt;code&gt;Fedora-Cloud-Base-25&lt;/code&gt; comes with cloud-init pre-installed, but no datasources are enabled by default. This is simply the best way I could find to configure that before uploading the&amp;nbsp;image:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# Get `/dev/sda1`&amp;#39;s offset:&lt;/span&gt;
+&lt;span class="nv"&gt;OFFSET&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt; sfdisk -J disk.raw &lt;span class="p"&gt;|&lt;/span&gt; python -c &lt;span class="s1"&gt;&amp;#39;import sys, json; a=json.load(sys.stdin); print(a[&amp;quot;partitiontable&amp;quot;][&amp;quot;partitions&amp;quot;][0][&amp;quot;start&amp;quot;]*512)&amp;#39;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; tee /dev/tty &lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="c1"&gt;# Make mounting directory&lt;/span&gt;
+sudo mkdir /mnt/disk
+&lt;span class="c1"&gt;# Mount the image&lt;/span&gt;
+sudo mount -o &lt;span class="nv"&gt;offset&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$OFFSET&lt;/span&gt; disk.raw /mnt/disk
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Alternatively: Consider using my &lt;a href="https://opsech.io/posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html"&gt;steps here&lt;/a&gt; on mounting virtual machine disk images. Though it will certainly work, this was not needed here because we&amp;#8217;re dealing with a &lt;span class="caps"&gt;RAW&lt;/span&gt; image instead of &lt;span class="caps"&gt;VDI&lt;/span&gt;, &lt;span class="caps"&gt;VMDK&lt;/span&gt;, or &lt;span class="caps"&gt;QCOW2&lt;/span&gt;. (i.e. just use &lt;code&gt;guestmount&lt;/code&gt; from &lt;code&gt;libguestfs-tools&lt;/code&gt;)&lt;/p&gt;
+&lt;p&gt;Now that the image is mounted, we need to edit the &lt;code&gt;/etc/cloud/cloud.cfg&lt;/code&gt; file to add the &lt;code&gt;GCE&lt;/code&gt; datasource:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo sed -i &lt;span class="s1"&gt;&amp;#39;s|^#[ ]*datasource:|datasource:\n  GCE:|&amp;#39;&lt;/span&gt; /mnt/disk/etc/cloud/cloud.cfg
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This replaces the line &lt;code&gt;# datasource:&lt;/code&gt; (already present)&amp;nbsp;with:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;datasource:
+    GCE:
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Which enables the &lt;code&gt;GCE&lt;/code&gt; datasource for cloud-init. Without this, the imagine will hang during boot and fail on loading the metadata information, and then when &lt;span class="caps"&gt;SSH&lt;/span&gt; finally does come up you won&amp;#8217;t be able to login because no &lt;span class="caps"&gt;SSH&lt;/span&gt; keys will have been&amp;nbsp;inserted.&lt;/p&gt;
+&lt;p&gt;Finally, unmount and package up the &lt;code&gt;disk.raw&lt;/code&gt; image into a compatible &lt;code&gt;.tar.gz&lt;/code&gt; file:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo umount /mnt/disk
+tar caf &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;.tar.gz&amp;quot;&lt;/span&gt; disk.raw
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Now that the image prep is done, we need to install &lt;code&gt;google-cloud-sdk&lt;/code&gt; from their official repositories for &lt;span class="caps"&gt;RHEL&lt;/span&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo tee -a /etc/yum.repos.d/google-cloud-sdk.repo &amp;lt;&amp;lt; EOM
+[google-cloud-sdk]
+name=Google Cloud SDK
+baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+       https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOM
+
+sudo dnf install -y google-cloud-sdk
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Next we will login to Google Cloud, then set the active&amp;nbsp;project:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;gcloud auth login
+gcloud config &lt;span class="nb"&gt;set&lt;/span&gt; project my-project-id
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Then transfer and create the bucket and&amp;nbsp;image:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;gsutil mb &lt;span class="s2"&gt;&amp;quot;gs://&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUCKET_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+gsutil cp &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;.tar.gz&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;gs://&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUCKET_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;/&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Should output the&amp;nbsp;following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;| [1 files][170.6 MiB/170.6 MiB]    2.5 MiB/s                                   
+Operation completed over 1 objects/170.6 MiB.
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Finally, register the&amp;nbsp;image:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# Sanitize the name of the image for GCE&lt;/span&gt;
+&lt;span class="nv"&gt;CLOUD_IMAGE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;sed &lt;span class="s1"&gt;&amp;#39;s|[\._]|-|g;s|.*|\L&amp;amp;|&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt; -e &lt;span class="s2"&gt;&amp;quot;Cloud image name: &lt;/span&gt;&lt;span class="nv"&gt;$CLOUD_IMAGE&lt;/span&gt;&lt;span class="s2"&gt;\n&amp;quot;&lt;/span&gt;
+gcloud compute images create --source-uri &lt;span class="s2"&gt;&amp;quot;gs://&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUCKET_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;/&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;.tar.gz&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CLOUD_IMAGE&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Should output something&amp;nbsp;like:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Cloud image name: fedora-cloud-base-25-1-3-x86-64
+
+Created [https://www.googleapis.com/compute/v1/projects/my-project-id/global/images/fedora-cloud-base-25-1-3-x86-64].
+NAME                             PROJECT         FAMILY  DEPRECATED  STATUS
+fedora-cloud-base-25-1-3-x86-64  my-project-id                        READY
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Configure your &lt;span class="caps"&gt;GCE&lt;/span&gt; &lt;span class="caps"&gt;SSH&lt;/span&gt; keys, either go &lt;a href="https://console.cloud.google.com/compute/metadata/sshKeys?project=kuber-course"&gt;here (console, use for &lt;strong&gt;ssh-agent users&lt;/strong&gt;)&lt;/a&gt;, or use key files setup&amp;nbsp;by:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;gcloud compute config-ssh
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Which will make a new key, save it to &lt;code&gt;~/.ssh/google_compute_engine*&lt;/code&gt; and upload it for you. &lt;span class="caps"&gt;NOTE&lt;/span&gt;: If you want to use &lt;code&gt;ssh-agent&lt;/code&gt;, then you must configure it through the web console manually. Hint: Get your public keys via &lt;code&gt;ssh-add -L&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Now you may proceed with starting instances either via the commandline or the &lt;a href="https://console.cloud.google.com/compute/instances"&gt;&lt;span class="caps"&gt;GUI&lt;/span&gt;&amp;nbsp;console&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;gcloud compute instances create fedora-25-test &lt;span class="se"&gt;\&lt;/span&gt;
+    --machine-type g1-small &lt;span class="se"&gt;\&lt;/span&gt;
+    --boot-disk-size 20GB &lt;span class="se"&gt;\&lt;/span&gt;
+    --image &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CLOUD_IMAGE&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+    --zone us-east1-b
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Should output something&amp;nbsp;like:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Created [https://www.googleapis.com/compute/v1/projects/kuber-course/zones/us-east1-b/instances/fedora-25-test1].
+NAME             ZONE        MACHINE_TYPE  PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP    STATUS
+fedora-25-test1  us-east1-b  g1-small                   10.142.0.2   104.196.42.60  RUNNING
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;span class="caps"&gt;SSH&lt;/span&gt;-Agent&amp;nbsp;users:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh fedora@104.196.42.60
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;code&gt;gcloud compute config-ssh&lt;/code&gt; users:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;gcloud compute ssh fedora-25-test
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Hint: If this doesn&amp;#8217;t work or you otherwise run into trouble, you can output the serial console log in the following&amp;nbsp;manner:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;gcloud beta compute instances get-serial-port-output fedora-25-test
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;</content><category term="gce"></category><category term="google cloud"></category><category term="fedora"></category></entry><entry><title>OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars</title><link href="https://opsech.io/posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" rel="alternate"></link><published>2017-06-09T09:59:07-04:00</published><updated>2017-06-09T09:59:07-04:00</updated><author><name>Mike</name></author><id>tag:opsech.io,2017-06-09:/posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html</id><summary type="html">&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;10:00:58 up 101 days, 14:17,  1 user,  load average: 1.47, 1.07, 0.99
 &lt;/pre&gt;&lt;/div&gt;
 
 

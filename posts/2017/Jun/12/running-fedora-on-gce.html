@@ -5,18 +5,20 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="keywords" content="kde" />
+        <meta name="author" content="Mike" />
+        <meta name="keywords" content="gce,google cloud,fedora" />
+        <meta name="description" content="How to convert, upload and create a Fedora 25 image on Google Compute Engine" />
 
 
-    <title>kde - #> opsech.io</title>
+    <title>Running Fedora 25 on Google Compute Engine - #> opsech.io</title>
 
-        <link rel="stylesheet" href="../theme/css/bootstrap.slate.min.css" type="text/css"/>
+        <link rel="stylesheet" href="../../../../theme/css/bootstrap.slate.min.css" type="text/css"/>
 
-    <link href="../theme/css/font-awesome.min.css" rel="stylesheet" />
-    <link href="../theme/css/pygments/monokai.css" rel="stylesheet" />
+    <link href="../../../../theme/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="../../../../theme/css/pygments/monokai.css" rel="stylesheet" />
     
-        <link href="../theme/css/typogrify.css" rel="stylesheet" />
-    <link href="../theme/css/pelican-twitchy.min.css" rel="stylesheet" />
+        <link href="../../../../theme/css/typogrify.css" rel="stylesheet" />
+    <link href="../../../../theme/css/pelican-twitchy.min.css" rel="stylesheet" />
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -26,7 +28,7 @@
     <![endif]-->
     
     <!-- Feeds -->
-        <link href="../extra/custom.css" rel="stylesheet" />
+        <link href="../../../../extra/custom.css" rel="stylesheet" />
 
 <link rel="apple-touch-icon" sizes="57x57" href="/favs/apple-touch-icon-57x57.png">
 <link rel="apple-touch-icon" sizes="60x60" href="/favs/apple-touch-icon-60x60.png">
@@ -57,13 +59,13 @@
         <div id="sidebar-wrapper-small" class="twitchy-background">
             <ul id="accordion-small" class="sidebar-nav sidebar-nav-small">
                 <li>
-        <a href=".." title="#> opsech.io" class="collapsed">
+        <a href="../../../.." title="#> opsech.io" class="collapsed">
             <span class="glyphicon glyphicon-home"></span>
         </a>
     </li>
                 <li class="nav-divider"></li>
                 <li>
-        <a href="../archives.html" title="Recent Articles" class="collapsed">
+        <a href="../../../../archives.html" title="Recent Articles" class="collapsed">
             <span class="glyphicon glyphicon-th-list"></span>
         </a>
     </li>
@@ -76,12 +78,12 @@
                 </li>
                 <li class="panel anti-panel"><ul id="collapse-share-small" class="collapse ">
                     <li>
-                        <a href="https://www.facebook.com/sharer/sharer.php?u=" title="Share via Facebook" target="popup">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=../../../../posts/2017/Jun/12/running-fedora-on-gce.html" title="Share via Facebook" target="popup">
                             <i class="fa fa-facebook fa-fw fa-lg padding-small"></i>
                         </a>
                     </li>
                     <li>
-                        <a href="https://plus.google.com/share?url=" title="Share via Google+" target="popup">
+                        <a href="https://plus.google.com/share?url=../../../../posts/2017/Jun/12/running-fedora-on-gce.html" title="Share via Google+" target="popup">
                             <i class="fa fa-google-plus padding-small"></i>
                         </a>
                     </li>
@@ -119,7 +121,7 @@
         <div id="sidebar-wrapper" class="twitchy-background">
             <ul id="accordion" class="sidebar-nav">
                 <li class="sidebar-brand">
-                    <a href="../">
+                    <a href="../../../../">
                             <span class="glyphicon glyphicon-home padding-small"></span>
                             #> opsech.io
                     </a>
@@ -131,39 +133,39 @@
                             Recent Articles
                         </a>
                     </li>
-                    <li class="panel anti-panel"><ul id="collapse-latest" class="sidebar_submenu collapse ">
-                        <li class="">
-                            <a class="hide-overflow" href="../posts/2017/Jun/12/running-fedora-on-gce.html" title="Running Fedora 25 on Google Compute Engine">
+                    <li class="panel anti-panel"><ul id="collapse-latest" class="sidebar_submenu collapse in">
+                        <li class="active">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/12/running-fedora-on-gce.html" title="Running Fedora 25 on Google Compute Engine">
                                 <i class="fa fa-file-text padding-small"></i>
                                 Running Fedora 25 on Google Compute Engine
                             </a>
                         </li>
                         <li class="">
-                            <a class="hide-overflow" href="../posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" title="OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/09/openjdk-april-2017-security-update-131-8u131-and-md5-signed-jars.html" title="OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars">
                                 <i class="fa fa-file-text padding-small"></i>
                                 OpenJDK April 2017 security update 131 (8u131) and MD5 signed jars
                             </a>
                         </li>
                         <li class="">
-                            <a class="hide-overflow" href="../posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html" title="How to mount VM disk images on Fedora">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html" title="How to mount VM disk images on Fedora">
                                 <i class="fa fa-file-text padding-small"></i>
                                 How to mount VM disk images on Fedora
                             </a>
                         </li>
                         <li class="">
-                            <a class="hide-overflow" href="../posts/2017/Jun/06/docker-cleanup-aliases-for-bash.html" title="Docker cleanup aliases for bash">
+                            <a class="hide-overflow" href="../../../../posts/2017/Jun/06/docker-cleanup-aliases-for-bash.html" title="Docker cleanup aliases for bash">
                                 <i class="fa fa-file-text padding-small"></i>
                                 Docker cleanup aliases for bash
                             </a>
                         </li>
                         <li class="">
-                            <a class="hide-overflow" href="../posts/2017/May/23/docker-dns-with-firewalld-on-fedora.html" title="Docker DNS with FirewallD on Fedora">
+                            <a class="hide-overflow" href="../../../../posts/2017/May/23/docker-dns-with-firewalld-on-fedora.html" title="Docker DNS with FirewallD on Fedora">
                                 <i class="fa fa-file-text padding-small"></i>
                                 Docker DNS with FirewallD on Fedora
                             </a>
                         </li>
                     <li>
-                        <a href="../archives.html">
+                        <a href="../../../../archives.html">
                             <i class="fa fa-arrow-right padding-small"></i>
                             More
                         </a>
@@ -178,13 +180,13 @@
                 </li>
                 <li class="panel anti-panel"><ul id="collapse-share" class="sidebar_submenu collapse ">
                     <li>
-                        <a href="https://www.facebook.com/sharer/sharer.php?u=" target="popup">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=../../../../posts/2017/Jun/12/running-fedora-on-gce.html" target="popup">
                             <i class="fa fa-facebook fa-fw fa-lg padding-small"></i>
                             Facebook
                         </a>
                     </li>
                     <li>
-                        <a href="https://plus.google.com/share?url=" target="popup">
+                        <a href="https://plus.google.com/share?url=../../../../posts/2017/Jun/12/running-fedora-on-gce.html" target="popup">
                             <i class="fa fa-google-plus padding-small"></i>
                             Google+
                         </a>
@@ -233,7 +235,7 @@
                 </li>
                 <li class="panel anti-panel"><ul id="collapse-pages" class="sidebar_submenu collapse ">
                     <li>
-                        <a href="../pages/the-name.html">
+                        <a href="../../../../pages/the-name.html">
                             <i class="fa fa-file-text padding-small"></i>
                             The&nbsp;Name
                         </a>
@@ -249,56 +251,56 @@
                 </li>
                 <li class="panel anti-panel"><ul id="collapse-categories" class="sidebar_submenu collapse ">
                     <li >
-                        <a href="../category/aws.html">
+                        <a href="../../../../category/aws.html">
                             <i class="fa fa-folder-open padding-small"></i>
                             aws
                             <span class="badge pull-right categorybadge">1</span>
                         </a>
                     </li>
-                    <li >
-                        <a href="../category/cloud.html">
+                    <li class="active">
+                        <a href="../../../../category/cloud.html">
                             <i class="fa fa-folder-open padding-small"></i>
                             cloud
                             <span class="badge pull-right categorybadge">1</span>
                         </a>
                     </li>
                     <li >
-                        <a href="../category/docker.html">
+                        <a href="../../../../category/docker.html">
                             <i class="fa fa-folder-open padding-small"></i>
                             docker
                             <span class="badge pull-right categorybadge">2</span>
                         </a>
                     </li>
                     <li >
-                        <a href="../category/fixes.html">
+                        <a href="../../../../category/fixes.html">
                             <i class="fa fa-folder-open padding-small"></i>
                             fixes
                             <span class="badge pull-right categorybadge">1</span>
                         </a>
                     </li>
                     <li >
-                        <a href="../category/linux.html">
+                        <a href="../../../../category/linux.html">
                             <i class="fa fa-folder-open padding-small"></i>
                             linux
                             <span class="badge pull-right categorybadge">6</span>
                         </a>
                     </li>
                     <li >
-                        <a href="../category/openwrt.html">
+                        <a href="../../../../category/openwrt.html">
                             <i class="fa fa-folder-open padding-small"></i>
                             openwrt
                             <span class="badge pull-right categorybadge">1</span>
                         </a>
                     </li>
                     <li >
-                        <a href="../category/quick-tips.html">
+                        <a href="../../../../category/quick-tips.html">
                             <i class="fa fa-folder-open padding-small"></i>
                             quick-tips
                             <span class="badge pull-right categorybadge">3</span>
                         </a>
                     </li>
                     <li >
-                        <a href="../category/scripts.html">
+                        <a href="../../../../category/scripts.html">
                             <i class="fa fa-folder-open padding-small"></i>
                             scripts
                             <span class="badge pull-right categorybadge">1</span>
@@ -313,199 +315,199 @@
                         Tags
                     </a>
                 </li>
-                <li class="panel anti-panel"><ul id="collapse-tags" class="sidebar_submenu collapse in">
+                <li class="panel anti-panel"><ul id="collapse-tags" class="sidebar_submenu collapse ">
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe6ac50>]">
-                        <a href="../tag/vizio.html">
+                        <a href="../../../../tag/vizio.html">
                             vizio
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe5cb50>]">
-                        <a href="../tag/centos.html">
+                        <a href="../../../../tag/centos.html">
                             centos
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5f3d3dd0>]">
-                        <a href="../tag/virt.html">
+                        <a href="../../../../tag/virt.html">
                             virt
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fdec850>]">
-                        <a href="../tag/gce.html">
+                        <a href="../../../../tag/gce.html">
                             gce
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe41890>]">
-                        <a href="../tag/pulseaudio.html">
+                        <a href="../../../../tag/pulseaudio.html">
                             pulseaudio
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fdca9d0>, <pelican.contents.Article object at 0x7fbb60325b90>]">
-                        <a href="../tag/quick-tips.html">
+                        <a href="../../../../tag/quick-tips.html">
                             quick-tips
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5f3d3dd0>, <pelican.contents.Article object at 0x7fbb5fdd6610>, <pelican.contents.Article object at 0x7fbb5fde3650>, <pelican.contents.Article object at 0x7fbb5fe28e90>, <pelican.contents.Article object at 0x7fbb600cd590>, <pelican.contents.Article object at 0x7fbb5fdca9d0>, <pelican.contents.Article object at 0x7fbb60325b90>, <pelican.contents.Article object at 0x7fbb5fe41890>, <pelican.contents.Article object at 0x7fbb5fe6ac50>, <pelican.contents.Article object at 0x7fbb5fe416d0>]">
-                        <a href="../tag/linux.html">
+                        <a href="../../../../tag/linux.html">
                             linux
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5f3d3dd0>]">
-                        <a href="../tag/qemu.html">
+                        <a href="../../../../tag/qemu.html">
                             qemu
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fdec850>]">
-                        <a href="../tag/google-cloud.html">
+                        <a href="../../../../tag/google-cloud.html">
                             google cloud
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe6a110>]">
-                        <a href="../tag/openwrt.html">
+                        <a href="../../../../tag/openwrt.html">
                             openwrt
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe5cb50>, <pelican.contents.Article object at 0x7fbb60325b90>]">
-                        <a href="../tag/systemd.html">
+                        <a href="../../../../tag/systemd.html">
                             systemd
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb600cd590>]">
-                        <a href="../tag/samba.html">
+                        <a href="../../../../tag/samba.html">
                             samba
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5f3dafd0>]">
-                        <a href="../tag/java.html">
+                        <a href="../../../../tag/java.html">
                             java
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fdec850>, <pelican.contents.Article object at 0x7fbb5f3d3dd0>, <pelican.contents.Article object at 0x7fbb5fde3650>, <pelican.contents.Article object at 0x7fbb5fdca9d0>, <pelican.contents.Article object at 0x7fbb60325b90>, <pelican.contents.Article object at 0x7fbb5fe41890>, <pelican.contents.Article object at 0x7fbb5fe416d0>]">
-                        <a href="../tag/fedora.html">
+                        <a href="../../../../tag/fedora.html">
                             fedora
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe138d0>]">
-                        <a href="../tag/s3.html">
+                        <a href="../../../../tag/s3.html">
                             s3
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe28e90>]">
-                        <a href="../tag/centos7.html">
+                        <a href="../../../../tag/centos7.html">
                             centos7
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fdd6610>, <pelican.contents.Article object at 0x7fbb5fe5ca50>]">
-                        <a href="../tag/bash.html">
+                        <a href="../../../../tag/bash.html">
                             bash
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fde3650>, <pelican.contents.Article object at 0x7fbb5fdca9d0>]">
-                        <a href="../tag/dns.html">
+                        <a href="../../../../tag/dns.html">
                             dns
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb600cd590>]">
-                        <a href="../tag/kde.html">
+                        <a href="../../../../tag/kde.html">
                             kde
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe5ca50>]">
-                        <a href="../tag/tips.html">
+                        <a href="../../../../tag/tips.html">
                             tips
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fdd6610>]">
-                        <a href="../tag/containers.html">
+                        <a href="../../../../tag/containers.html">
                             containers
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe28e90>]">
-                        <a href="../tag/python.html">
+                        <a href="../../../../tag/python.html">
                             python
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5f3dafd0>]">
-                        <a href="../tag/ipmi.html">
+                        <a href="../../../../tag/ipmi.html">
                             ipmi
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe138d0>]">
-                        <a href="../tag/aws.html">
+                        <a href="../../../../tag/aws.html">
                             aws
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe138d0>]">
-                        <a href="../tag/cloudfront.html">
+                        <a href="../../../../tag/cloudfront.html">
                             cloudfront
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe416d0>]">
-                        <a href="../tag/dnf.html">
+                        <a href="../../../../tag/dnf.html">
                             dnf
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe6ac50>]">
-                        <a href="../tag/xorg.html">
+                        <a href="../../../../tag/xorg.html">
                             xorg
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe6ac50>]">
-                        <a href="../tag/x11.html">
+                        <a href="../../../../tag/x11.html">
                             X11
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb600cd590>]">
-                        <a href="../tag/filesharing.html">
+                        <a href="../../../../tag/filesharing.html">
                             filesharing
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe28e90>]">
-                        <a href="../tag/python3.html">
+                        <a href="../../../../tag/python3.html">
                             python3
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe6ac50>]">
-                        <a href="../tag/nouveau.html">
+                        <a href="../../../../tag/nouveau.html">
                             nouveau
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5f3dafd0>]">
-                        <a href="../tag/openjdk.html">
+                        <a href="../../../../tag/openjdk.html">
                             openjdk
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe6a110>]">
-                        <a href="../tag/wifi.html">
+                        <a href="../../../../tag/wifi.html">
                             wifi
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fde3650>]">
-                        <a href="../tag/firewalld.html">
+                        <a href="../../../../tag/firewalld.html">
                             firewalld
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe5cb50>]">
-                        <a href="../tag/nfs.html">
+                        <a href="../../../../tag/nfs.html">
                             nfs
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe6ac50>]">
-                        <a href="../tag/nvidia.html">
+                        <a href="../../../../tag/nvidia.html">
                             nvidia
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fde3650>]">
-                        <a href="../tag/networkmanager.html">
+                        <a href="../../../../tag/networkmanager.html">
                             NetworkManager
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fdd6610>, <pelican.contents.Article object at 0x7fbb5fde3650>]">
-                        <a href="../tag/docker.html">
+                        <a href="../../../../tag/docker.html">
                             docker
                         </a>
                     </li>
                     <li class="tag-[<pelican.contents.Article object at 0x7fbb5fe6a110>]">
-                        <a href="../tag/scripting.html">
+                        <a href="../../../../tag/scripting.html">
                             scripting
                         </a>
                     </li>
@@ -523,23 +525,202 @@
         <!-- Page Content -->
         <div id="page-content-wrapper">
             <div class="container-fluid">
-<div class="row">
-    <div class="col-lg-9">
-        <header class="page-header">
-            <h1>Articles featuring kde</h1>
-        </header>
+<section id="content">
+    <article>
+        <div class="row">
+            <div class="col-lg-9">
+                <header class="page-header">
+                    <h1>
+                        <a href="../../../../posts/2017/Jun/12/running-fedora-on-gce.html"
+                           rel="bookmark"
+                           title="Permalink to Running Fedora 25 on Google Compute Engine">
+                            Running Fedora 25 on Google Compute&nbsp;Engine
+                        </a>
+                        <small>
+<div class="post-info">
+    <div class="publish-info-block">
+        <small>
+            <span class="published">
+                <i class="fa fa-calendar padding-small"></i><time datetime="2017-06-12T23:43:26-04:00"> Mon 12 June 2017</time>
+            </span>
+            <span class="category">
+                <i class="fa fa-folder-open padding-small"></i><a href="../../../../category/cloud.html">cloud</a>
+            </span>
+            <span class="tags">
+                <i class="fa fa-tags padding-small"></i>
+                <a href="../../../../tag/gce.html">gce</a> /                 <a href="../../../../tag/google-cloud.html">google cloud</a> /                 <a href="../../../../tag/fedora.html">fedora</a>            </span>
+        </small>
     </div>
-</div>
-<div class="row">
-    <div class="col-lg-9">
-            <article>
-                <h4>
-                    <time datetime="2016-04-06T00:42:41-04:00"> Wed 06 April 2016</time>
-                    <a href="../posts/2016/Apr/06/sharing-files-with-kde-and-samba.html">Enable Samba usershares and kdenetwork-filesharing on Fedora&nbsp;23</a>
-                </h4>
-            </article>
-    </div>
-</div>
+</div><!-- /.post-info -->                        </small>
+                    </h1>
+                </header>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="entry-content">
+                    <p>Recently I had an opportunity to mess around with Google Compute Engine and noticed a distinct lack of presence of my beloved Fedora <span class="caps">OS</span>. A quick searching turned up <a href="http://rancher.com/running-fedora-21-on-google-compute-engine/">this how-to</a>, that while <span class="caps">OK</span>, was slightly outdated (insofar as the options didn&#8217;t work exactly as is). So, I&#8217;ve decided to record the exact steps I took to get a fully-functioning Fedora 25 image on <a href="Google Compute Engine"><span class="caps">GCE</span></a>.</p>
+<h4 id="prerequisites"><a class="toclink" href="#prerequisites">Prerequisites</a></h4>
+<ol>
+<li>A Google&nbsp;Account</li>
+<li>A Google Cloud Platform Project-<span class="caps">ID</span></li>
+<li>A Linux machine (preferably local Fedora 25) to install <code>google-cloud-sdk</code></li>
+<li>Expected programs: <code>sfdisk</code>, <code>wget</code>, <code>xz</code>, <code>python</code>, <code>ssh</code>, <code>dnf</code></li>
+</ol>
+<h4 id="instructions"><a class="toclink" href="#instructions">Instructions</a></h4>
+<ol>
+<li>
+<p>Image&nbsp;prep:</p>
+<p>First we need to get the Fedora Cloud <span class="caps">RAW</span> image and convert it to be compatible with <span class="caps">GCE</span>. Make note of <code>IMAGE_NAME</code> and <code>BUCKET_NAME</code>, you may need to change those and we will be using those going forward (If you set it once and use the same shell for everything you&#8217;re&nbsp;fine):</p>
+<div class="highlight"><pre><span></span><span class="nv">IMAGE_NAME</span><span class="o">=</span>Fedora-Cloud-Base-25-1.3.x86_64
+<span class="nv">BUCKET_NAME</span><span class="o">=</span>my-unique-bucket-name
+
+wget -O - <span class="s2">&quot;https://download.fedoraproject.org/pub/fedora/linux/releases/25/CloudImages/x86_64/images/</span><span class="si">${</span><span class="nv">IMAGE_NAME</span><span class="si">}</span><span class="s2">.raw.xz&quot;</span> <span class="se">\</span>
+    <span class="p">|</span> xz -cd - &gt; disk.raw
+</pre></div>
+
+
+<p>Now that we have a <code>disk.raw</code> (what <span class="caps">GCE</span> expects inside the <code>.tar.gz</code>) we also need to temporarily mount it and enable the <code>GCE</code> cloud-init datasource. <code>Fedora-Cloud-Base-25</code> comes with cloud-init pre-installed, but no datasources are enabled by default. This is simply the best way I could find to configure that before uploading the&nbsp;image:</p>
+<div class="highlight"><pre><span></span><span class="c1"># Get `/dev/sda1`&#39;s offset:</span>
+<span class="nv">OFFSET</span><span class="o">=</span><span class="k">$(</span> sfdisk -J disk.raw <span class="p">|</span> python -c <span class="s1">&#39;import sys, json; a=json.load(sys.stdin); print(a[&quot;partitiontable&quot;][&quot;partitions&quot;][0][&quot;start&quot;]*512)&#39;</span> <span class="p">|</span> tee /dev/tty <span class="k">)</span>
+<span class="c1"># Make mounting directory</span>
+sudo mkdir /mnt/disk
+<span class="c1"># Mount the image</span>
+sudo mount -o <span class="nv">offset</span><span class="o">=</span><span class="nv">$OFFSET</span> disk.raw /mnt/disk
+</pre></div>
+
+
+<p>Alternatively: Consider using my <a href="../../../../posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html">steps here</a> on mounting virtual machine disk images. Though it will certainly work, this was not needed here because we&#8217;re dealing with a <span class="caps">RAW</span> image instead of <span class="caps">VDI</span>, <span class="caps">VMDK</span>, or <span class="caps">QCOW2</span>. (i.e. just use <code>guestmount</code> from <code>libguestfs-tools</code>)</p>
+<p>Now that the image is mounted, we need to edit the <code>/etc/cloud/cloud.cfg</code> file to add the <code>GCE</code> datasource:</p>
+<div class="highlight"><pre><span></span>sudo sed -i <span class="s1">&#39;s|^#[ ]*datasource:|datasource:\n  GCE:|&#39;</span> /mnt/disk/etc/cloud/cloud.cfg
+</pre></div>
+
+
+<p>This replaces the line <code># datasource:</code> (already present)&nbsp;with:</p>
+<div class="highlight"><pre><span></span>datasource:
+    GCE:
+</pre></div>
+
+
+<p>Which enables the <code>GCE</code> datasource for cloud-init. Without this, the imagine will hang during boot and fail on loading the metadata information, and then when <span class="caps">SSH</span> finally does come up you won&#8217;t be able to login because no <span class="caps">SSH</span> keys will have been&nbsp;inserted.</p>
+<p>Finally, unmount and package up the <code>disk.raw</code> image into a compatible <code>.tar.gz</code> file:</p>
+<div class="highlight"><pre><span></span>sudo umount /mnt/disk
+tar caf <span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGE_NAME</span><span class="si">}</span><span class="s2">.tar.gz&quot;</span> disk.raw
+</pre></div>
+
+
+</li>
+<li>
+<p>Now that the image prep is done, we need to install <code>google-cloud-sdk</code> from their official repositories for <span class="caps">RHEL</span>:</p>
+<div class="highlight"><pre><span></span>sudo tee -a /etc/yum.repos.d/google-cloud-sdk.repo &lt;&lt; EOM
+[google-cloud-sdk]
+name=Google Cloud SDK
+baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+       https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOM
+
+sudo dnf install -y google-cloud-sdk
+</pre></div>
+
+
+</li>
+<li>
+<p>Next we will login to Google Cloud, then set the active&nbsp;project:</p>
+<div class="highlight"><pre><span></span>gcloud auth login
+gcloud config <span class="nb">set</span> project my-project-id
+</pre></div>
+
+
+</li>
+<li>
+<p>Then transfer and create the bucket and&nbsp;image:</p>
+<div class="highlight"><pre><span></span>gsutil mb <span class="s2">&quot;gs://</span><span class="si">${</span><span class="nv">BUCKET_NAME</span><span class="si">}</span><span class="s2">&quot;</span>
+gsutil cp <span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGE_NAME</span><span class="si">}</span><span class="s2">.tar.gz&quot;</span> <span class="s2">&quot;gs://</span><span class="si">${</span><span class="nv">BUCKET_NAME</span><span class="si">}</span><span class="s2">/&quot;</span>
+</pre></div>
+
+
+<p>Should output the&nbsp;following:</p>
+<div class="highlight"><pre><span></span>| [1 files][170.6 MiB/170.6 MiB]    2.5 MiB/s                                   
+Operation completed over 1 objects/170.6 MiB.
+</pre></div>
+
+
+</li>
+<li>
+<p>Finally, register the&nbsp;image:</p>
+<div class="highlight"><pre><span></span><span class="c1"># Sanitize the name of the image for GCE</span>
+<span class="nv">CLOUD_IMAGE</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>sed <span class="s1">&#39;s|[\._]|-|g;s|.*|\L&amp;|&#39;</span> <span class="o">&lt;&lt;&lt;</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGE_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="k">)</span><span class="s2">&quot;</span>
+<span class="nb">echo</span> -e <span class="s2">&quot;Cloud image name: </span><span class="nv">$CLOUD_IMAGE</span><span class="s2">\n&quot;</span>
+gcloud compute images create --source-uri <span class="s2">&quot;gs://</span><span class="si">${</span><span class="nv">BUCKET_NAME</span><span class="si">}</span><span class="s2">/</span><span class="si">${</span><span class="nv">IMAGE_NAME</span><span class="si">}</span><span class="s2">.tar.gz&quot;</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLOUD_IMAGE</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+
+
+<p>Should output something&nbsp;like:</p>
+<div class="highlight"><pre><span></span>Cloud image name: fedora-cloud-base-25-1-3-x86-64
+
+Created [https://www.googleapis.com/compute/v1/projects/my-project-id/global/images/fedora-cloud-base-25-1-3-x86-64].
+NAME                             PROJECT         FAMILY  DEPRECATED  STATUS
+fedora-cloud-base-25-1-3-x86-64  my-project-id                        READY
+</pre></div>
+
+
+</li>
+<li>
+<p>Configure your <span class="caps">GCE</span> <span class="caps">SSH</span> keys, either go <a href="https://console.cloud.google.com/compute/metadata/sshKeys?project=kuber-course">here (console, use for <strong>ssh-agent users</strong>)</a>, or use key files setup&nbsp;by:</p>
+<div class="highlight"><pre><span></span>gcloud compute config-ssh
+</pre></div>
+
+
+<p>Which will make a new key, save it to <code>~/.ssh/google_compute_engine*</code> and upload it for you. <span class="caps">NOTE</span>: If you want to use <code>ssh-agent</code>, then you must configure it through the web console manually. Hint: Get your public keys via <code>ssh-add -L</code></p>
+</li>
+<li>
+<p>Now you may proceed with starting instances either via the commandline or the <a href="https://console.cloud.google.com/compute/instances"><span class="caps">GUI</span>&nbsp;console</a></p>
+<div class="highlight"><pre><span></span>gcloud compute instances create fedora-25-test <span class="se">\</span>
+    --machine-type g1-small <span class="se">\</span>
+    --boot-disk-size 20GB <span class="se">\</span>
+    --image <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLOUD_IMAGE</span><span class="si">}</span><span class="s2">&quot;</span> <span class="se">\</span>
+    --zone us-east1-b
+</pre></div>
+
+
+<p>Should output something&nbsp;like:</p>
+<div class="highlight"><pre><span></span>Created [https://www.googleapis.com/compute/v1/projects/kuber-course/zones/us-east1-b/instances/fedora-25-test1].
+NAME             ZONE        MACHINE_TYPE  PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP    STATUS
+fedora-25-test1  us-east1-b  g1-small                   10.142.0.2   104.196.42.60  RUNNING
+</pre></div>
+
+
+</li>
+<li>
+<p><span class="caps">SSH</span>-Agent&nbsp;users:</p>
+<div class="highlight"><pre><span></span>ssh fedora@104.196.42.60
+</pre></div>
+
+
+<p><code>gcloud compute config-ssh</code> users:</p>
+<div class="highlight"><pre><span></span>gcloud compute ssh fedora-25-test
+</pre></div>
+
+
+<p>Hint: If this doesn&#8217;t work or you otherwise run into trouble, you can output the serial console log in the following&nbsp;manner:</p>
+<div class="highlight"><pre><span></span>gcloud beta compute instances get-serial-port-output fedora-25-test
+</pre></div>
+
+
+</li>
+</ol>
+                </div>
+                <footer class="text-right">
+                    <p>- Mike</p>
+                </footer>
+            </div>
+        </div>
+    </article>
+</section>
 <footer>
     <hr>
     <div class="row">
@@ -559,29 +740,11 @@
     </div>
     <!-- /#wrapper -->
     <!-- jQuery Version 1.11.2 -->
-    <script src="../theme/js/jquery-1.11.2.min.js"></script>
+    <script src="../../../../theme/js/jquery-1.11.2.min.js"></script>
     <!-- Bootstrap Core JavaScript -->
-    <script src="../theme/js/bootstrap.min.js"></script>
+    <script src="../../../../theme/js/bootstrap.min.js"></script>
     <!-- twitchy Script -->
-    <script src="../theme/js/pelican_twitchy.min.js"></script>
-<script>
-    function FadeInOnScroll(ObjectList){
-        ObjectList.each(function(i) {
-            var bottom_of_object = $(this).position().top + $(this).outerHeight();
-            var bottom_of_window = $(window).scrollTop() + $(window).height();
+    <script src="../../../../theme/js/pelican_twitchy.min.js"></script>
 
-            if( bottom_of_window > bottom_of_object ){
-                $(this).fadeTo(750,1);
-            }
-        });
-    }
-
-    articles = $("article").fadeTo(0, 0.05);
-    FadeInOnScroll(articles)
-
-    $(window).scroll(function() {
-        FadeInOnScroll(articles)
-    });
-</script>
 </body>
 </html>
