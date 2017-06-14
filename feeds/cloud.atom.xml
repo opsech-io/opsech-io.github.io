@@ -20,39 +20,68 @@ wget -O - &lt;span class="s2"&gt;&amp;quot;https://download.fedoraproject.org/pu
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;Now that we have a &lt;code&gt;disk.raw&lt;/code&gt; (what &lt;span class="caps"&gt;GCE&lt;/span&gt; expects inside the &lt;code&gt;.tar.gz&lt;/code&gt;) we also need to temporarily mount it and enable the &lt;code&gt;GCE&lt;/code&gt; cloud-init datasource. &lt;code&gt;Fedora-Cloud-Base-25&lt;/code&gt; comes with cloud-init pre-installed, but no datasources are enabled by default. This is simply the best way I could find to configure that before uploading the&amp;nbsp;image:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# Get `/dev/sda1`&amp;#39;s offset:&lt;/span&gt;
+&lt;p&gt;Now that we have a &lt;code&gt;disk.raw&lt;/code&gt; (the file name &lt;strong&gt;&lt;span class="caps"&gt;GCE&lt;/span&gt; expects&lt;/strong&gt; inside the &lt;code&gt;.tar.gz&lt;/code&gt;) we also need to temporarily mount it, upgrade &lt;code&gt;cloud-init&lt;/code&gt;, and enable the &lt;code&gt;GCE&lt;/code&gt; cloud-init datasource. &lt;code&gt;Fedora-Cloud-Base-25&lt;/code&gt; comes with cloud-init pre-installed, but no datasources are enabled by default. This is simply the best way I could find to configure that before uploading the&amp;nbsp;image:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# Get /dev/sda1 parition offset:&lt;/span&gt;
 &lt;span class="nv"&gt;OFFSET&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt; sfdisk -J disk.raw &lt;span class="p"&gt;|&lt;/span&gt; python -c &lt;span class="s1"&gt;&amp;#39;import sys, json; a=json.load(sys.stdin); print(a[&amp;quot;partitiontable&amp;quot;][&amp;quot;partitions&amp;quot;][0][&amp;quot;start&amp;quot;]*512)&amp;#39;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; tee /dev/tty &lt;span class="k"&gt;)&lt;/span&gt;
-&lt;span class="c1"&gt;# Make mounting directory&lt;/span&gt;
-sudo mkdir /mnt/disk
-&lt;span class="c1"&gt;# Mount the image&lt;/span&gt;
-sudo mount -o &lt;span class="nv"&gt;offset&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$OFFSET&lt;/span&gt; disk.raw /mnt/disk
+
+&lt;span class="c1"&gt;# Either become root and paste these line-by-line or the whole block at once&lt;/span&gt;
+sudo &lt;span class="nv"&gt;OFFSET&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$OFFSET&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; sh -c &lt;span class="s1"&gt;&amp;#39;\&lt;/span&gt;
+&lt;span class="s1"&gt;# Make mounting directory&lt;/span&gt;
+&lt;span class="s1"&gt;mkdir -p /mnt/disk&lt;/span&gt;
+&lt;span class="s1"&gt;# Mount the image and prepare the chroot&lt;/span&gt;
+&lt;span class="s1"&gt;mount -o offset=$OFFSET disk.raw /mnt/disk&lt;/span&gt;
+&lt;span class="s1"&gt;mount -t proc /proc /mnt/disk/proc&lt;/span&gt;
+&lt;span class="s1"&gt;mount --rbind /sys /mnt/disk/sys&lt;/span&gt;
+&lt;span class="s1"&gt;mount --make-rslave /mnt/disk/sys&lt;/span&gt;
+&lt;span class="s1"&gt;mount --rbind /dev /mnt/disk/dev&lt;/span&gt;
+&lt;span class="s1"&gt;mount --make-rslave /mnt/disk/dev&amp;#39;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;Alternatively: Consider using my &lt;a href="https://opsech.io/posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html"&gt;steps here&lt;/a&gt; on mounting virtual machine disk images. Though it will certainly work, this was not needed here because we&amp;#8217;re dealing with a &lt;span class="caps"&gt;RAW&lt;/span&gt; image instead of &lt;span class="caps"&gt;VDI&lt;/span&gt;, &lt;span class="caps"&gt;VMDK&lt;/span&gt;, or &lt;span class="caps"&gt;QCOW2&lt;/span&gt;. (i.e. just use &lt;code&gt;guestmount&lt;/code&gt; from &lt;code&gt;libguestfs-tools&lt;/code&gt;)&lt;/p&gt;
-&lt;p&gt;Now that the image is mounted, we need to edit the &lt;code&gt;/etc/cloud/cloud.cfg&lt;/code&gt; file to add the &lt;code&gt;GCE&lt;/code&gt; datasource:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo sed -i &lt;span class="s1"&gt;&amp;#39;s|^#[ ]*datasource:|datasource:\n  GCE:|&amp;#39;&lt;/span&gt; /mnt/disk/etc/cloud/cloud.cfg
+&lt;p&gt;&lt;strong&gt;Alternatively&lt;/strong&gt;: Consider using my &lt;a href="https://opsech.io/posts/2017/Jun/07/how-to-mount-vm-disk-images-on-fedora.html"&gt;steps here&lt;/a&gt; on mounting virtual machine disk images. Though it will certainly work, this was not needed here because we&amp;#8217;re dealing with a &lt;span class="caps"&gt;RAW&lt;/span&gt; image instead of &lt;span class="caps"&gt;VDI&lt;/span&gt;, &lt;span class="caps"&gt;VMDK&lt;/span&gt;, or &lt;span class="caps"&gt;QCOW2&lt;/span&gt;. (i.e. just use &lt;code&gt;guestmount&lt;/code&gt; for just mounting, and &lt;code&gt;virt-rescue&lt;/code&gt; for a minimal virtual host. They are both from &lt;code&gt;libguestfs-tools&lt;/code&gt;)&lt;/p&gt;
+&lt;p&gt;Now that the image is mounted, we need to add to the clout-init &lt;code&gt;cloud.cfg.d&lt;/code&gt; in order to enable the &lt;code&gt;GCE&lt;/code&gt; datasource:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo tee /mnt/disk/etc/cloud/cloud.cfg.d/GCE.cfg &amp;lt;&amp;lt;EOF
+datasource_list: [ &amp;#39;GCE&amp;#39; ]
+datasource: { GCE: {} }
+EOF
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;This replaces the line &lt;code&gt;# datasource:&lt;/code&gt; (already present)&amp;nbsp;with:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;datasource:
-    GCE:
+&lt;p&gt;This enables the &lt;code&gt;GCE&lt;/code&gt; datasource for cloud-init. Without this, the imagine will hang during boot and fail on loading the metadata information, and then when &lt;span class="caps"&gt;SSH&lt;/span&gt; finally does come up you won&amp;#8217;t be able to login because no &lt;span class="caps"&gt;SSH&lt;/span&gt; keys will have been&amp;nbsp;inserted.&lt;/p&gt;
+&lt;p&gt;There is &lt;a href="https://github.com/cloud-init/cloud-init/commit/328fe5ab399b1f5b48d1985f41fc2ef66e368922#diff-6a1bacc7c738db3b0d2cc0dc15960d70"&gt;a bug&lt;/a&gt; presently in Fedora 25 stable&amp;#8217;s version of &lt;code&gt;cloud-init&lt;/code&gt;, which is at &lt;code&gt;0.7.8&lt;/code&gt; - this version based on my findings was completely incompatible with modern &lt;code&gt;GCE&lt;/code&gt; and I couldn&amp;#8217;t get it to work. Thus, we must upgrade &lt;code&gt;cloud-init&lt;/code&gt;&lt;span class="quo"&gt;&amp;#8216;&lt;/span&gt;s package as well (Upgrade everything else later as to not bloat the image). The current version in Fedora 25 as of this writing is &lt;code&gt;0.7.9&lt;/code&gt; which is just recent enough to include the&amp;nbsp;fix:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo chroot /mnt/disk dnf -yq --enablerepo&lt;span class="o"&gt;=&lt;/span&gt;updates-testing upgrade cloud-init
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;Which enables the &lt;code&gt;GCE&lt;/code&gt; datasource for cloud-init. Without this, the imagine will hang during boot and fail on loading the metadata information, and then when &lt;span class="caps"&gt;SSH&lt;/span&gt; finally does come up you won&amp;#8217;t be able to login because no &lt;span class="caps"&gt;SSH&lt;/span&gt; keys will have been&amp;nbsp;inserted.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Optional&lt;/strong&gt;: Now to install the &lt;code&gt;google-compute-engine&lt;/code&gt; and associated packages. This is &lt;strong&gt;not mandatory&lt;/strong&gt;, but the Google Cloud Platform console won&amp;#8217;t be able to &lt;span class="caps"&gt;SSH&lt;/span&gt; in and other functionality will be missing. Copy paste the following and hit&amp;nbsp;enter:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo tee /mnt/disk/etc/yum.repos.d/google-cloud.repo &amp;lt;&amp;lt; EOF
+[google-cloud-compute]
+name=Google Cloud Compute
+baseurl=https://packages.cloud.google.com/yum/repos/google-cloud-compute-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+       https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+
+chroot /mnt/disk dnf install -yq google-compute-engine google-compute-engine-init google-config
+chroot /mnt/disk dnf clean all
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;&lt;span class="caps"&gt;WARNING&lt;/span&gt;&lt;/em&gt;&lt;/strong&gt;: Try to do as little as possible in the chroot because it will balloon the image size. Don&amp;#8217;t do a full &lt;code&gt;dnf upgrade&lt;/code&gt; yet.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Pro tip&lt;/em&gt;: Try &lt;code&gt;virt-sparsify disk.raw disk.raw.sparse &amp;amp;&amp;amp; mv disk.raw.sparse disk.raw&lt;/code&gt; to save a little extra&amp;nbsp;space.&lt;/p&gt;
 &lt;p&gt;Finally, unmount and package up the &lt;code&gt;disk.raw&lt;/code&gt; image into a compatible &lt;code&gt;.tar.gz&lt;/code&gt; file:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo umount /mnt/disk
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo umount -AR /mnt/disk
 tar caf &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;.tar.gz&amp;quot;&lt;/span&gt; disk.raw
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Now that the image prep is done, we need to install &lt;code&gt;google-cloud-sdk&lt;/code&gt; from their official repositories for &lt;span class="caps"&gt;RHEL&lt;/span&gt;:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo tee -a /etc/yum.repos.d/google-cloud-sdk.repo &amp;lt;&amp;lt; EOM
+&lt;p&gt;Now that the image prep is done, we need to install the &lt;code&gt;google-cloud-sdk&lt;/code&gt; from Google&amp;#8217;s official repositories on our&amp;nbsp;workstation:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo tee /etc/yum.repos.d/google-cloud-sdk.repo &amp;lt;&amp;lt; EOF
 [google-cloud-sdk]
 name=Google Cloud SDK
 baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el7-x86_64
@@ -61,7 +90,7 @@ gpgcheck=1
 repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-EOM
+EOF
 
 sudo dnf install -y google-cloud-sdk
 &lt;/pre&gt;&lt;/div&gt;
@@ -69,7 +98,7 @@ sudo dnf install -y google-cloud-sdk
 
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Next we will login to Google Cloud, then set the active&amp;nbsp;project:&lt;/p&gt;
+&lt;p&gt;Now that the &lt;span class="caps"&gt;SDK&lt;/span&gt; is installed &lt;code&gt;gcloud&lt;/code&gt; and &lt;code&gt;gsutil&lt;/code&gt; commands are present. Next, we will authenticate with the Google Cloud Platform, then set the active&amp;nbsp;project:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;gcloud auth login
 gcloud config &lt;span class="nb"&gt;set&lt;/span&gt; project my-project-id
 &lt;/pre&gt;&lt;/div&gt;
@@ -78,13 +107,13 @@ gcloud config &lt;span class="nb"&gt;set&lt;/span&gt; project my-project-id
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Then transfer and create the bucket and&amp;nbsp;image:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;gsutil mb &lt;span class="s2"&gt;&amp;quot;gs://&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUCKET_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;gsutil mb &lt;span class="s2"&gt;&amp;quot;gs://&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUCKET_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="c1"&gt;# OPTIONAL, could exist already&lt;/span&gt;
 gsutil cp &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;.tar.gz&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;gs://&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUCKET_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;/&amp;quot;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;Should output the&amp;nbsp;following:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;| [1 files][170.6 MiB/170.6 MiB]    2.5 MiB/s                                   
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;| [1 files][170.6 MiB/170.6 MiB]    2.5 MiB/s
 Operation completed over 1 objects/170.6 MiB.
 &lt;/pre&gt;&lt;/div&gt;
 
@@ -118,7 +147,7 @@ fedora-cloud-base-25-1-3-x86-64  my-project-id                        READY
 &lt;p&gt;Which will make a new key, save it to &lt;code&gt;~/.ssh/google_compute_engine*&lt;/code&gt; and upload it for you. &lt;span class="caps"&gt;NOTE&lt;/span&gt;: If you want to use &lt;code&gt;ssh-agent&lt;/code&gt;, then you must configure it through the web console manually. Hint: Get your public keys via &lt;code&gt;ssh-add -L&lt;/code&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Now you may proceed with starting instances either via the commandline or the &lt;a href="https://console.cloud.google.com/compute/instances"&gt;&lt;span class="caps"&gt;GUI&lt;/span&gt;&amp;nbsp;console&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Now you&amp;#8217;re ready to start creating new instances either via the commandline or the &lt;a href="https://console.cloud.google.com/compute/instances"&gt;&lt;span class="caps"&gt;GUI&lt;/span&gt;&amp;nbsp;console&lt;/a&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;gcloud compute instances create fedora-25-test &lt;span class="se"&gt;\&lt;/span&gt;
     --machine-type g1-small &lt;span class="se"&gt;\&lt;/span&gt;
     --boot-disk-size 20GB &lt;span class="se"&gt;\&lt;/span&gt;
@@ -146,7 +175,8 @@ fedora-25-test1  us-east1-b  g1-small                   10.142.0.2   104.196.42.
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;Hint: If this doesn&amp;#8217;t work or you otherwise run into trouble, you can output the serial console log in the following&amp;nbsp;manner:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; If you installed the &lt;code&gt;google-compute-engine&lt;/code&gt; packages, additional users will be created for each &lt;span class="caps"&gt;SSH&lt;/span&gt; key in your Google Cloud Platform&amp;nbsp;Metadata.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Hint&lt;/strong&gt;: If this doesn&amp;#8217;t work or you otherwise run into trouble, you can output the serial console log in the following&amp;nbsp;manner:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;gcloud beta compute instances get-serial-port-output fedora-25-test
 &lt;/pre&gt;&lt;/div&gt;
 
