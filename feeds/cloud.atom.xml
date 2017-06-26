@@ -65,8 +65,8 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
 
-chroot /mnt/disk dnf install -yq google-compute-engine google-compute-engine-init google-config
-chroot /mnt/disk dnf clean all
+sudo chroot /mnt/disk dnf install -yq google-compute-engine google-compute-engine-init google-config
+sudo chroot /mnt/disk dnf clean all
 &lt;/pre&gt;&lt;/div&gt;
 
 
